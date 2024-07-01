@@ -21,12 +21,11 @@ onUnmounted(() => {
 })
 function getData() {
   displayData.value = []
-  axios.get('https://sapi.yangshipin.cn/api/x/cctv/wordcloud.json').then(res => {
+  axios.get('https://sapi.yangshipin.cn/api/x/cctv/wordcloud.json?v='+Math.random()).then(res => {
     // console.log(res);
-    randomData.value = randomArr(res.data.sjCai, 150)
+    randomData.value = randomArr(res.data.sjCai, 170)
     randomData.value.forEach(val => {
-      val.value = Math.floor(Math.random() * 8) + 1.5
-    })
+      val.value = Math.floor(Math.random() * 8) + 1.5 })
     fixData.value = randomArr(res.data.gdCai, res.data.gdSubStep)
     fixData.value.forEach((val,idx) => {
       val.value -= (idx+1)
@@ -37,7 +36,7 @@ function getData() {
     setTimeout(() => {
       initEchart()
       // TODO 定时器
-      // timer.value = setInterval(() => getData(), 300000)
+      timer.value = setInterval(() => getData(), 300000)
     })
   })
 }
@@ -75,10 +74,10 @@ function initEchart(){
       height: '100%',
       right: null,
       bottom: null,
-      sizeRange: [12, 60],
+      sizeRange: [10, 32],
       rotationRange: [0, 0],
       rotationStep: 0,
-      gridSize: 13, // 词间距
+      gridSize: 5, // 词间距
       drawOutOfBound: false, // 设置为true可以使单词部分在画布之外绘制, 允许绘制大于画布大小的单词
       layoutAnimation: true,
       textStyle: {
@@ -130,9 +129,9 @@ function initEchart(){
 
 <style scoped>
 .content{
-  width: 100vh;
-  height: 100vh;
-  background-color: #006764;
+  width: 750px;
+  height: 750px;
+  background-color: transparent;
   #myEchart{
     width: 100%;
     height: 100%;
