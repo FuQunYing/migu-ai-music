@@ -15,6 +15,9 @@ let timer = ref()
 let chart = ref()
 onMounted(() => {
   getData()
+  const scale = window.screen.width / 750 * 0.72
+  // document.getElementById('app').style.transform='scale('+scale+')'
+  document.getElementById('myEchart').style.transform='scale('+scale+')'
 })
 onUnmounted(() => {
   clearInterval(timer.value)
@@ -32,7 +35,7 @@ function getData() {
     })
     // console.log(fixData.value);
     displayData.value = fixData.value.concat(randomData.value)
-    // console.log(displayData.value);
+    console.log(displayData.value);
     setTimeout(() => {
       initEchart()
       // TODO 定时器
@@ -132,9 +135,16 @@ function initEchart(){
   width: 750px;
   height: 750px;
   background-color: transparent;
+  &::-webkit-scrollbar{
+    display: none;
+  }
   #myEchart{
     width: 100%;
     height: 100%;
+    transform-origin: left top;
+    &::-webkit-scrollbar{
+      display: none;
+    }
   }
 }
 </style>
