@@ -15,7 +15,7 @@ import HelloWorld from './components/HelloWorld.vue'
 html,body,div,p{
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  box-sizing: border-box;
 }
 #app{
   transform-origin: left top;

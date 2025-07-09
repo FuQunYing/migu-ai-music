@@ -17,7 +17,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://hot-yangshipin-cn-1259470100.cos.ap-beijing.myqcloud.com',
+        target: 'https://migu-aimusic.yangshipin.cn/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }
