@@ -14,7 +14,32 @@ export class LoginService{
         return request('data/user/exit', 'post')
     }
 }
+/*
+https://migu-aimusic.yangshipin.cn/nofilter/login登陆接口
+入参json
+{
+"vuid":121,
+"token":"sdfdsf",
+"projectId":"sdfsf"
+}
+成功返回
+{
+    "code": "000000",
+    "msg": "",
+    "result": ""
+}
+错误返回 code不为000000
+{
+    "code": "401",
+    "msg": "",
+    "result": null
+}
+* */
+
 export class CommonService{
+    static async checkLogin(param) {
+        return request('/nofilter/login',param, 'post')
+    }
     static async getMaterial() {
         return request('/userMusic/getMaterial', 'post')
     }
@@ -24,22 +49,11 @@ export class CommonService{
     static async previewList() {
         return request('/userMusic/getResultList', 'post')
     }
-    static async exportData(url,param, name) {
-        return request(url, param,'get','blob').then((res) => {
-            if (res) {
-                const link = document.createElement('a')
-                const blob = new Blob([res], {type: 'application/vnd.ms-excel'});
-                link.style.display = 'none'
-                link.href = URL.createObjectURL(blob);
-                link.setAttribute('download', name + '.xlsx')
-                console.log(link);
-                document.body.appendChild(link)
-                link.click()
-                document.body.removeChild(link)
-            } else {
-                message.warning('暂无数据')
-            }
-        })
+    static async history(param) {
+        return request('/userMusic/getUserHistory', param,'post')
+    }
+    static async del(param) {
+        return request('/userMusic/del',param, 'post')
     }
 }
 

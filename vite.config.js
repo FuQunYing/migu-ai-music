@@ -18,6 +18,7 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'https://migu-aimusic.yangshipin.cn/',
+        // target: 'http://10.16.6.166:8989/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }
