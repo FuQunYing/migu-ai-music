@@ -3,8 +3,86 @@
   <head>
     <meta charset="UTF-8">
     <link rel="icon" href="/favicon.ico">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>咪咕彩铃</title>
+      <!-- 完全禁止缩放 -->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, shrink-to-fit=no">
+      <meta name="format-detection" content="telephone=no">
+      <meta name="apple-mobile-web-app-capable" content="yes">
+      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+      <meta name="apple-touch-fullscreen" content="yes">
+        <title>咪咕彩铃</title>
+      <style>
+          /* 超强力CSS禁用缩放 */
+          * {
+              box-sizing: border-box;
+              -webkit-user-select: none;
+              -moz-user-select: none;
+              -ms-user-select: none;
+              user-select: none;
+              -webkit-touch-callout: none;
+              -webkit-tap-highlight-color: transparent;
+              touch-action: manipulation;
+              /* 强制禁用缩放相关属性 */
+              -webkit-text-size-adjust: 100%;
+              -ms-text-size-adjust: 100%;
+              text-size-adjust: 100%;
+          }
+
+          html {
+              /* 多重保险 */
+              touch-action: manipulation;
+              -webkit-touch-callout: none;
+              -webkit-user-select: none;
+              -khtml-user-select: none;
+              -moz-user-select: none;
+              -ms-user-select: none;
+              user-select: none;
+              /* 禁用缩放 */
+              -webkit-text-size-adjust: none;
+              -moz-text-size-adjust: none;
+              -ms-text-size-adjust: none;
+              text-size-adjust: none;
+              /* 固定宽度 */
+              width: 100%;
+              height: 100%;
+              overflow-x: hidden;
+          }
+
+          body {
+              margin: 0;
+              padding: 0;
+              width: 100%;
+              height: 100vh;
+              /* 强制禁用所有触摸动作 */
+              touch-action: pan-y;
+              -webkit-overflow-scrolling: touch;
+              /* 禁用选择 */
+              -webkit-user-select: none;
+              -moz-user-select: none;
+              -ms-user-select: none;
+              user-select: none;
+              /* 禁用高亮 */
+              -webkit-tap-highlight-color: rgba(0,0,0,0);
+              -webkit-tap-highlight-color: transparent;
+              overflow-x: hidden;
+          }
+
+          /* 强制所有输入元素也禁用缩放 */
+          input, textarea, select, button {
+              touch-action: manipulation;
+              -webkit-user-select: text;
+              user-select: text;
+              /* 防止输入时缩放 */
+              font-size: 16px !important;
+              -webkit-text-size-adjust: 100%;
+          }
+
+          /* 强制设置所有元素 */
+          div, p, h1, h2, h3, h4, h5, h6, span, a, img, video {
+              touch-action: manipulation;
+              -webkit-user-select: none;
+              user-select: none;
+          }
+      </style>
   </head>
   <body>
     <div id="app"></div>

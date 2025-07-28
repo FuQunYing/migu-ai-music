@@ -175,7 +175,7 @@ function getUrlParam(name) {
 </script>
 
 <template>
-  <div>
+  <div class="index-container">
     <div class="content" v-if="!createLoading">
       <div class="log-btn" @click="openLog">创作记录</div>
       <div class="choose">
@@ -259,7 +259,10 @@ function getUrlParam(name) {
 </template>
 
 <style scoped lang="less">
-
+.index-container{
+  width: 100vw;
+  overflow-x: hidden;
+}
 
 
 .create-btn{
@@ -457,18 +460,20 @@ function getUrlParam(name) {
   }
 }
 .logs{
-  width: 100vw;
+  width: 0;
   height: 100vh;
   overflow-y: auto;
-  padding: 16px;
+  padding: 0;
   position: absolute;
   top: 0;
   left: 100%;
   background: url("../assets/sub-bg.png") no-repeat 0 0;
   background-size: 100% 100%;
   z-index: 99;
-  transition: all .2s;
+  transition: left .2s;
   &.open{
+    width: 100vw;
+    padding: 16px;
     left: 0;
   }
   .title{
