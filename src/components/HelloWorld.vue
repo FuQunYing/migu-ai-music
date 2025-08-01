@@ -172,6 +172,16 @@ function getUrlParam(name) {
   // 如果传了name则返回指定参数，否则返回全部参数对象
   return name ? params[name] || null : params;
 }
+let isPlayVideo = ref(false)
+let currentVideoUrl = ref('')
+function playVideo(url) {
+  currentVideoUrl.value = url
+  isPlayVideo.value = true
+}
+const closeVideo = () => {
+  isPlayVideo.value = false
+  currentVideoUrl.value = ''
+}
 </script>
 
 <template>
@@ -206,6 +216,7 @@ function getUrlParam(name) {
             <div class="cover">
               <img :src="item.avatarUrl" alt="">
               <span>{{item.productName}}</span>
+              <img @click="playVideo(item.resultUrl)" class="play" src="../assets/play.png" alt="">
             </div>
             <div class="btn">
               <div @click="choosePreview(item)">我也要玩</div>
@@ -223,6 +234,8 @@ function getUrlParam(name) {
         <p>正在生成中，请耐心等待</p>
       </div>
       <div class="video-con" v-if="backVideo">
+        <div class="log-btn" @click="openLog">创作记录</div>
+        <div class="back-icon" @click="backCreate"> < </div>
         <video :src="videoUrl" controls playsinline ></video>
         <div class="bottom-btn">
           <div class="create-btn" @click="backCreate">
@@ -254,17 +267,45 @@ function getUrlParam(name) {
         </div>
       </div>
     </div>
+
+    <div class="play-video-modal" v-if="isPlayVideo">
+      <div class="close" @click="closeVideo">+</div>
+      <video :src="currentVideoUrl" controls></video>
+    </div>
   </div>
 
 </template>
 
 <style scoped lang="less">
+.play-video-modal{
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9999;
+  background: #000;
+  .close{
+    font-size: 72px;
+    transform: rotate(45deg);
+    color: white;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+  }
+  video{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    width: 100%;
+    height: auto;
+  }
+}
 .index-container{
   width: 100vw;
   overflow-x: hidden;
 }
-
-
 .create-btn{
   >div{
     height: 50px;
@@ -444,6 +485,14 @@ function getUrlParam(name) {
           bottom: 8px;
           left: 16px;
         }
+        .play{
+          width: 35px;
+          height: 40px;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
       }
       .btn{
         >div{
@@ -539,6 +588,35 @@ function getUrlParam(name) {
     >video{
       width: 100%;
       height: auto;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .log-btn{
+      width: 120px;
+      height: 30px;
+      line-height: 30px;
+      border-radius: 30px;
+      background: linear-gradient(90deg, #5DF7FC 0%, #FFFFFF 98%);
+      color: #0B2770;
+      position: absolute;
+      right: -24px;
+      top: 24px;
+      text-align: left;
+      padding-left: 24px;
+      z-index: 2;
+    }
+    .back-icon{
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      font-weight: bold;
+      color: #fff;
+      width: 36px;
+      text-align: center;
+      font-size: 24px;
+      transform: scaleY(1.5);
+      z-index: 2;
     }
   }
   .bottom-btn{
