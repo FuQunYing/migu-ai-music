@@ -235,7 +235,7 @@ const closeVideo = () => {
       </div>
       <div class="video-con" v-if="backVideo">
         <div class="log-btn" @click="openLog">创作记录</div>
-        <div class="back-icon" @click="backCreate"> < </div>
+        <div class="back-icon" @click="backCreate"><img src="../assets/btn_back.png" alt=""></div>
         <video :src="videoUrl" controls playsinline ></video>
         <div class="bottom-btn">
           <div class="create-btn" @click="backCreate">
@@ -251,7 +251,7 @@ const closeVideo = () => {
 
     <div class="logs" :class="showLog ? 'open' : ''">
       <div class="title">
-        <div @click="closeLog"> < </div>
+        <div @click="closeLog"><img src="../assets/btn_back.png" alt=""></div>
         <div>创作记录</div>
       </div>
       <div class="log-list">
@@ -269,7 +269,7 @@ const closeVideo = () => {
     </div>
 
     <div class="play-video-modal" v-if="isPlayVideo">
-      <div class="close" @click="closeVideo">+</div>
+      <div class="close" @click="closeVideo"><img src="../assets/close.png" alt=""></div>
       <video :src="currentVideoUrl" controls></video>
     </div>
   </div>
@@ -283,15 +283,17 @@ const closeVideo = () => {
   position: fixed;
   left: 0;
   top: 0;
-  z-index: 9999;
+  z-index: 1000;
   background: #000;
   .close{
-    font-size: 72px;
-    transform: rotate(45deg);
     color: white;
     position: absolute;
     top: 16px;
     right: 16px;
+    z-index: 999;
+    >img{
+      width: 36px;
+    }
   }
   video{
     position: absolute;
@@ -300,6 +302,7 @@ const closeVideo = () => {
     left: 0;
     width: 100%;
     height: auto;
+    z-index: 998;
   }
 }
 .index-container{
@@ -537,11 +540,14 @@ const closeVideo = () => {
         width: 36px;
         text-align: center;
         font-size: 24px;
-        transform: scaleY(1.5);
+        >img{
+          width: 100%;
+        }
       }
       &:nth-child(2){
         width: calc(100% - 36px);
         text-align: center;
+        text-indent: -36px;
       }
     }
   }
@@ -615,8 +621,10 @@ const closeVideo = () => {
       width: 36px;
       text-align: center;
       font-size: 24px;
-      transform: scaleY(1.5);
       z-index: 2;
+      >img{
+        width: 100%;
+      }
     }
   }
   .bottom-btn{
