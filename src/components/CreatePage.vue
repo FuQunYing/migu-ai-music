@@ -1,196 +1,79 @@
 <script setup>
-import {nextTick, onMounted, ref} from 'vue'
-import {CommonService} from "@/api/api.js";
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { CommonService } from '@/api/api.js';
 
-const router = useRouter()
+const route = useRoute();
+const router = useRouter();
 
-let musicList = ref([])
-let avatorList = ref([])
-let previewList = ref([])
-let currentPreviewImg = ref('')
-let currentSel = ref({
-  musicId: '',
-  avatarId: '',
-})
-let token = ref('')
-let pid = ref('')
-let uid = ref('')
-let url = 'https://migu-aimusic.yangshipin.cn/?btoken=e84c5a82da156094905673e4a95d153d&vuid=8918612acaf0e889bd7253c827f1ca79&projectId=AI_YS_WSGW&releaseId=81546853&cfrom=AI_YS_WSGW'
+let backVideo = ref(false);
+let videoUrl = ref('');
+let coverUrl = ref('');
+
 onMounted(() => {
-  token.value = getUrlParam('btoken')
-  pid.value = getUrlParam('projectId')
-  uid.value = getUrlParam('vuid')
-  checkLogin()
-})
-function checkLogin() {
-  CommonService.checkLogin({
-    "vuid":uid.value,
-    "token":token.value,
-    "projectId":pid.value
-  }).then(res => {
-    console.log(123,res);
-    if(res.code == '000000') {
-      getMaterial()
-      getPreviewList()
-    } else {
-      window.location.href = 'https://y.migu.cn/app/v5/p/ai-charging/index.html?appId=e88c86edee570fdc525f1dfb3ed95823&schannel=014X031&projectId=AI_YS_WSGW&releaseId=81546853'
-    }
-  }).catch(err => {
-    console.log(err);
-  })
-}
+  const data = history.state;
 
-// 打开日志页面
-const openLog = () => {
-  const data = {
-    vuid: uid.value,
-    token: token.value,
-    projectId: pid.value
-  };
-  router.push({ 
-    path: '/logs', 
-    state: data
-  });
-}
+  history.replaceState(null, '', location.pathname);
 
-function getMaterial() {
-  CommonService.getMaterial().then(res => {
-    console.log('资源',res);
-    if(res.code === '000000') {
-      avatorList.value = res.result.avatorList
-      musicList.value = res.result.musicList
-      currentSel.value.musicId = musicList.value[0].id
-      currentPreviewImg.value = avatorList.value[0].url
-      currentSel.value.avatarId = avatorList.value[0].id
-    }
-  })
-}
-function getPreviewList() {
-  CommonService.previewList().then(res => {
-    console.log('广场',res);
-    if(res.code === '000000') {
-      previewList.value = res.result
-    }
-  })
-}
-
-const clickM = (mid) => {
-  currentSel.value.musicId = mid
-}
-const clickA = (data) => {
-  currentSel.value.avatarId = data.id
-  currentPreviewImg.value = data.url
-}
-const choosePreview = (data) => {
-  currentSel.value.avatarId = data.avatarId
-  currentSel.value.musicId = data.musicId
-  currentPreviewImg.value = data.avatarUrl
-  nextTick(() => {
-    const currentImgElement = document.querySelector('.current-img')
-    if (currentImgElement) {
-      currentImgElement.scrollIntoView({ behavior: 'smooth' })
-    }
-  })
-}
-
-function createAudio() {
-  console.log(currentSel.value);
-  const data = {
-    ...currentSel.value,
-    vuid: uid.value,
-    token: token.value,
-    projectId: pid.value
-  };
-  // 使用 Vue Router 内置的 state 功能传递数据
-  router.push({ 
-    path: '/create', 
-    state: data
-  });
-}
-
-function getUrlParam(name) {
-  // 获取?后的查询字符串
-  const queryString = window.location.search.substring(1);
-  const params = {};
-
-  if (queryString) {
-    // 分割参数键值对
-    queryString.split('&').forEach(pair => {
-      const [key, value] = pair.split('=');
-      if (key) {
-        // 解码URI组件并存储
-        params[key] = decodeURIComponent(value || '');
-      }
-    });
+  if (data && data.musicId && data.avatarId) {
+    createAudio(data.musicId, data.avatarId, data.vuid, data.token, data.projectId);
+  } else {
+    console.error('Create page loaded without necessary data.');
   }
+});
 
-  // 如果传了name则返回指定参数，否则返回全部参数对象
-  return name ? params[name] || null : params;
+function createAudio(musicId, avatarId, vuid, token, projectId) {
+  CommonService.createAudio({
+    musicId,
+    avatarId,
+    vuid,
+    token,
+    projectId
+  }).then(res => {
+    console.log(res);
+    setTimeout(() => {
+      if (res.code === '000000') {
+        videoUrl.value = res.result.resultUrl;
+        coverUrl.value = res.result.avatarUrl;
+        backVideo.value = true;
+      }
+    }, 2500);
+  }).catch(err => {
+    console.error('API call failed:', err);
+  });
 }
-let isPlayVideo = ref(false)
-let currentVideoUrl = ref('')
-function playVideo(url) {
-  currentVideoUrl.value = url
-  isPlayVideo.value = true
+
+const backCreate = () => {
+  router.back();
+};
+
+function publicVideo() {
+  window.location.href = `https://y.migu.cn/app/v5/p/publish-mid/index.html?projectId=AI_YS_WSGW&releaseId=81546853&videoUrl=${videoUrl.value}&videoCover=${coverUrl.value}`;
 }
-const closeVideo = () => {
-  isPlayVideo.value = false
-  currentVideoUrl.value = ''
-}
+
 </script>
 
 <template>
   <div class="index-container">
-    <div class="content">
-      <div class="log-btn" @click="openLog">创作记录</div>
-      <div class="choose">
-        <div class="tit-img"><img src="../assets/tit-1.png" alt=""></div>
-        <div class="current-img">
-          <img :src="currentPreviewImg" alt="">
-        </div>
-        <div class="m-list">
-          <div class="m-item" v-for="item in musicList" :key="item.id" :class="currentSel.musicId === item.id ? 'current' : ''" @click="clickM(item.id)">
-            <span>{{item.displayMusicName}}</span>
+    <div class="created">
+      <div class="loading" v-if="!backVideo">
+        <img src="../assets/loading.png" alt="">
+        <p>正在生成中，请耐心等待</p>
+      </div>
+      <div class="video-con" v-if="backVideo">
+        <div class="back-icon" @click="backCreate"><img src="../assets/btn_back.png" alt=""></div>
+        <video :src="videoUrl" controls playsinline></video>
+        <div class="bottom-btn">
+          <div class="create-btn" @click="backCreate">
+            <div>重新创作</div>
           </div>
-        </div>
-        <div class="a-list">
-          <div class="a-item" v-for="item in avatorList" :key="item.id"  :class="currentSel.avatarId === item.id ? 'current' : ''" @click="clickA(item)">
-            <div>
-              <img :src="item.url" alt="">
-            </div>
+          <div class="create-btn" @click="publicVideo">
+            <div>发布视频</div>
           </div>
         </div>
       </div>
-      <div class="create-btn" @click="createAudio">
-        <div>立即创作</div>
-      </div>
-      <div class="preview-list">
-        <div class="tit-img"><img src="../assets/tit-2.png" alt="" style="width: 60%"></div>
-        <div class="list-con">
-          <div class="p-item" v-for="item in previewList" :key="item.id">
-            <div class="cover">
-              <img :src="item.avatarUrl" alt="">
-              <span>{{item.productName}}</span>
-              <img @click="playVideo(item.resultUrl)" class="play" src="../assets/play.png" alt="">
-            </div>
-            <div class="btn">
-              <div @click="choosePreview(item)">我也要玩</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="bottom-bg">
-        <img src="../assets/bottom-bg.png" alt="">
-      </div>
-    </div>
-
-    <div class="play-video-modal" v-if="isPlayVideo">
-      <div class="close" @click="closeVideo"><img src="../assets/close.png" alt=""></div>
-      <video :src="currentVideoUrl" controls></video>
     </div>
   </div>
-
 </template>
 
 <style scoped lang="less">
