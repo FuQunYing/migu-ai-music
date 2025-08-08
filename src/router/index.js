@@ -1,13 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HelloWorld from '../components/HelloWorld.vue'
+import MainPage from '../components/MainPage.vue'
 import CreatePage from '../components/CreatePage.vue'
 import LogPage from '../components/LogPage.vue'
+import VideoPage from '../components/VideoPage.vue'
 
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: HelloWorld
+    name: 'MainPage',
+    component: MainPage
   },
   {
     path: '/create',
@@ -18,6 +19,11 @@ const routes = [
     path: '/logs',
     name: 'Logs',
     component: LogPage
+  },
+  {
+    path: '/video',
+    name: 'VideoPage',
+    component: VideoPage
   }
 ]
 

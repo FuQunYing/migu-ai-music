@@ -102,7 +102,6 @@ function createAudio() {
     token: token.value,
     projectId: pid.value
   };
-  // 使用 Vue Router 内置的 state 功能传递数据
   router.push({ 
     path: '/create', 
     state: data
@@ -128,15 +127,8 @@ function getUrlParam(name) {
   // 如果传了name则返回指定参数，否则返回全部参数对象
   return name ? params[name] || null : params;
 }
-let isPlayVideo = ref(false)
-let currentVideoUrl = ref('')
 function playVideo(url) {
-  currentVideoUrl.value = url
-  isPlayVideo.value = true
-}
-const closeVideo = () => {
-  isPlayVideo.value = false
-  currentVideoUrl.value = ''
+  router.push({ path: '/video', query: { url: url } });
 }
 </script>
 
@@ -183,11 +175,6 @@ const closeVideo = () => {
       <div class="bottom-bg">
         <img src="../assets/bottom-bg.png" alt="">
       </div>
-    </div>
-
-    <div class="play-video-modal" v-if="isPlayVideo">
-      <div class="close" @click="closeVideo"><img src="../assets/close.png" alt=""></div>
-      <video :src="currentVideoUrl" controls></video>
     </div>
   </div>
 
