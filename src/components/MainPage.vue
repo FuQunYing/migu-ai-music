@@ -123,7 +123,7 @@ function createAudio() {
   // if((!taskId.value&&!window.location.href.split('?')[1])||(!!window.location.href.split('?')[1]&&!taskId.value)){
     // if(!!window.location.href.split('?')[1]){
       const filterUrl = window.location.href.split('?')[1].split('#/mainPage','&')
-      const result = 'https://migu-aimusic.yangshipin.cn/?btoken=de083b49de6844058de62731f1350ea9&vuid=a20303f0098a1a3c14fc02fd432fd430&projectId=AI_YS_WSGW&releaseId=81546853&cfrom=AI_YS_WSGW'
+      const result = `https://migu-aimusic.yangshipin.cn/?btoken=${token.value}`+`&vuid=${uid.value}`+'&projectId=AI_YS_WSGW&releaseId=81546853&cfrom=AI_YS_WSGW'
       // if (filterUrl.includes(":8080")) {
       //   result = str.replace(":8080", "");
       // } 
