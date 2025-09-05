@@ -65,7 +65,7 @@ const uploadAudio = async (formData, token) => {
 //   });
 //   audioFormData.append('Qo', JSON.stringify(obj));
   try {
-    const response = await fetch('/api/api/userMusic/create', {
+    const response = await fetch('/api/userMusic/create', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}` // 从关联参数获取 token

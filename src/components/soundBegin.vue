@@ -247,6 +247,7 @@ const getBlobFromUrl = async (url) => {
 };
 // 2. 将 Blob 转换为 FormData
 const blobToFormData = async (audioUrl, fileName) => {
+  const taskId = localStorage.getItem('taskId');
   const blob = await getBlobFromUrl(audioUrl);
   console.log('blob', blob)
   if (!blob) return null;
@@ -262,7 +263,7 @@ const blobToFormData = async (audioUrl, fileName) => {
   // formData.append('projectId', props.projectId);
   formData.append('token', props.token);
   formData.append('vuid', props.vuid);
-  formData.append('taskId', props.taskId);
+  formData.append('taskId', taskId);
   // formData.append('fileName', 'file.webm');
   // objectNew.vuid = props.vuid
   // objectNew.pageSize = 10
