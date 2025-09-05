@@ -76,8 +76,11 @@ const uploadAudio = async (formData, token) => {
     if (response.ok) {
       const result = await response.json();
       // 000000  创建成功  40001, "您已加入队列，请稍后" 50002,"任务在生成中，请稍等" 10002, "生成完成"
-      if(result.code == '000000'|| result.code == '10002'|| result.code == '40001'|| result.code == '50002'){
+      if(result.code == '000000'|| result.code == '10002'|| result.code == '40001'|| result.code == '50002'||result.code == '200'){
         progressTimer = setInterval(fetchResultList, 2000);
+      }else{
+        backVideo.value = false;
+        backVideFalse.value = true;
       }
     } else {
       throw new Error('上传失败');
@@ -98,12 +101,14 @@ const fetchResultList = async (data = {}) => {
     });
     console.log('response', response)
     if(response.data.result.status == '2'){
-      backVideo.value = false;
       backVideFalse.value = false;
       videoUrl.value = response.data.result.resultUrl;
-      backVideo.value = true;
+      backVideo.value = false;
       coverUrl.value = imgUrl.value;
       clearInterval(progressTimer);
+    }else{
+      backVideo.value = false;
+      backVideFalse.value = true;
     }
     return response.data;
   } catch (error) {
@@ -140,7 +145,7 @@ function publicVideo() {
           <p style="font-size: 14px;margin-top:8px;">原因:{{ errorMsg }}</p>
         </div>
         <div class="bottom-btnAgain">
-          <div class="create-btn" @click="backCreate" v-if="!backVideo&&!!backVideFalse">
+          <div class="create-btn" @click="backCreate">
             <div>重新创作</div>
           </div>
         </div>
