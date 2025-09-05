@@ -75,13 +75,13 @@ function getMaterial() {
       currentSel.value.avatarId = avatorList.value[0].id
       localStorage.setItem('url', currentPreviewImg.value);
 
-      const taskId = localStorage.getItem('taskId') ?  localStorage.getItem('taskId') : window.location.href.match(/taskId=(\w+)/)?.[1];
-      const imgUrl = localStorage.getItem('url')
-      console.log('taskId', taskId)
-      console.log('imgUrl', imgUrl)
-      if (!!taskId&&!!imgUrl) {
-        goRuter()
-      }
+      // const taskId = localStorage.getItem('taskId') ?  localStorage.getItem('taskId') : window.location.href.match(/taskId=(\w+)/)?.[1];
+      // const imgUrl = localStorage.getItem('url')
+      // console.log('taskId', taskId)
+      // console.log('imgUrl', imgUrl)
+      // if (!!taskId&&!!imgUrl) {
+      //   goRuter()
+      // }
     }
   })
 }
@@ -142,14 +142,7 @@ function goRuter() {
     vuid: uid.value,
     token: token.value,
     projectId: pid.value,
-    // taskId: taskId.value
   };
-  console.log('data', data)
-  // router.push({
-  //   path: '/create',
-  //   state: data
-  // });
-  // return
   router.push({
     path: '/makeSound',
     state: data,
@@ -160,7 +153,6 @@ function goRuter() {
       projectId:data.projectId,
       token:data.token,
       vuid:data.vuid,
-      // taskId: taskId.value
     }
   });
 }
