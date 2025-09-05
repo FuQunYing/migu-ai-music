@@ -1,42 +1,37 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import MainPage from '../components/MainPage.vue'
-import CreatePage from '../components/CreatePage.vue'
-import LogPage from '../components/LogPage.vue'
-import VideoPage from '../components/VideoPage.vue'
-import MakeSound from '../components/MakeSound.vue' // 录制声音
+import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
 
 const routes = [
   { path: '', redirect: '/mainPage' },
   {
     path: '/mainPage',
     name: 'MainPage',
-    component: MainPage
+    component: () => import('../components/MainPage.vue')
   },
   {
     path: '/create',
     name: 'Create',
-    component: CreatePage
+    component: () => import('../components/CreatePage.vue')
   },
   {
     path: '/logs',
     name: 'Logs',
-    component: LogPage
+    component: () => import('../components/LogPage.vue')
   },
   {
     path: '/video',
     name: 'VideoPage',
-    component: VideoPage
+    component: () => import('../components/VideoPage.vue')
   },
   {
     // 录制声音
     path: '/makeSound',
     name: 'MakeSound',
-    component: MakeSound
+    component: () => import('../components/MakeSound.vue')
   },
 ]
 
 const router = createRouter({
-  history: createWebHistory('/testenvironment/'),
+  history: createWebHashHistory(),
   routes
 })
 
