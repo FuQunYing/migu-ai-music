@@ -7,7 +7,7 @@ import MakeSound from '../components/MakeSound.vue' // 录制声音
 
 const routes = [
   {
-    path: '/',
+    path: 'MainPage',
     name: 'MainPage',
     component: MainPage
   },
