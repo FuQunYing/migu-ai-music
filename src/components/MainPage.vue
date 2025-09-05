@@ -123,7 +123,7 @@ function createAudio() {
     console.log('taskId', taskId.value)
     goRuter()
   }else{
-    const url = 'https://migu-aimusic.yangshipin.cn/testenvironment/?'+window.location.href.split('?')[1]
+    const url = 'https://migu-aimusic.yangshipin.cn/testenvironment/makeSound?'+window.location.href.split('?')[1]
     const paramsUrl = encodeURIComponent(url)
     const resultUrl = 'https://y.migu.cn/app/v5/p/ai-charging/index.html?' + `appId=e88c86edee570fdc525f1dfb3ed95823&schannel=014X031&cburl=${paramsUrl}`+ `projectId=AI_YS_WSGW#/task-id`
     window.location.href = resultUrl
