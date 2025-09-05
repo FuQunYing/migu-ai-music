@@ -3,12 +3,12 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 //生产
-//前端 https://migu-aimusic.yangshipin.cn/ 
+//前端 https://migu-aimusic.yangshipin.cn/
 //后端  https://migu-aimusic.yangshipin.cn/api
 
 //测试
 // 前端: https://migu-aimusic.yangshipin.cn/testenvironment
-// 后端：https://migu-aimusic.yangshipin.cn/testenvironment/api 
+// 后端：https://migu-aimusic.yangshipin.cn/testenvironment/api
 const front_end_base_uri = 'https://migu-aimusic.yangshipin.cn/testenvironment';
 const back_end_base_uri = 'https://migu-aimusic.yangshipin.cn/testenvironment/api';
 
@@ -17,7 +17,7 @@ export default defineConfig({
   plugins: [
     vue(),
   ],
-  base: './',
+  base: '/testenvironment/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -28,7 +28,7 @@ export default defineConfig({
     'Content-Type': 'application/javascript' // 强制 MIME 类型
   },
   server: {
-    
+
     proxy: {
       '/api': {
         // target: 'https://migu-aimusic.yangshipin.cn/',

@@ -6,6 +6,7 @@ import VideoPage from '../components/VideoPage.vue'
 import MakeSound from '../components/MakeSound.vue' // 录制声音
 
 const routes = [
+  { path: '', redirect: '/mainPage' },
   {
     path: '/',
     name: 'MainPage',
@@ -35,7 +36,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory('/testenvironment/'), 
+  history: createWebHistory('/testenvironment/'),
   routes
 })
 
