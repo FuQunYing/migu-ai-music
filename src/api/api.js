@@ -49,11 +49,20 @@ export class CommonService{
     static async previewList() {
         return request('/userMusic/getResultList', 'post')
     }
+
+    static async previewResult() {
+        return request('/userMusic/getResult', 'post')
+    }
+
     static async history(param) {
         return request('/userMusic/getUserHistory', param,'post')
     }
     static async del(param) {
         return request('/userMusic/del',param, 'post')
+    }
+    // 开始录音
+    static async beginSound(param) {
+        // return request('/userMusic/del',param, 'post')
     }
 }
 

@@ -1,7 +1,9 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted,onUnmounted,nextTick} from 'vue';
 import { useRouter } from 'vue-router';
 import { CommonService } from '@/api/api.js';
+import  DelDialog from '@/components/DelDialog.vue'
+
 
 const router = useRouter();
 
@@ -9,6 +11,18 @@ let logs = ref([]);
 let vuid = ref('');
 let token = ref('');
 let projectId = ref('');
+let selectId = ref('');
+const isLoading = ref(false);   // 是否加载中
+const hasMore = ref(true);      // 是否有更多数据
+const videoList = ref([]);       // 列表数据
+const pageNum = ref(1);         
+const pageSize = ref(12);     
+const videoItems = ref([]);    
+const observer = ref(null); 
+const scrollContainer = ref(null);
+
+// 弹框显示状态
+const showModal = ref(false);
 
 onMounted(() => {
   const data = history.state;
@@ -19,28 +33,108 @@ onMounted(() => {
     token.value = data.token;
     projectId.value = data.projectId;
     getHistory();
+
+    const container = scrollContainer.value;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+    }
+  }
+});
+
+onUnmounted(() => {
+  const container = scrollContainer.value;
+  if (container) {
+    container.removeEventListener('scroll', handleScroll);
+  }
+  // 销毁观察器
+  if (observer.value) {
+    observer.value.disconnect();
   }
 });
 
 function getHistory() {
+  console.log('hasMore.value', hasMore.value)
+  // 防止重复加载或无更多数据时请求
+  if (isLoading.value || !hasMore.value) return;
+
   CommonService.history({
     vuid: vuid.value,
     token: token.value,
     projectId: projectId.value,
-    pageSize: 10000,
-    pageNum: 1
+    pageNum: pageNum.value,
+    pageSize: pageSize.value
   }).then(res => {
     if (res.code === '000000') {
-      logs.value = res.result.data;
+      const list = res.result.data;
+      if(list && list.length > 0){
+        // 格式化新数据，添加加载状态标记
+        const newVideos = list.map(item => ({
+          ...item,
+          isLoaded: false,    // 视频是否加载
+          errorMsg: ''        // 错误信息
+        }));
+        
+        videoList.value = [...videoList.value, ...newVideos];
+        // 判断是否还有更多数据
+        hasMore.value = videoList.value.length < res.result.totalNum;
+        // 页码递增
+        pageNum.value++;
+        nextTick(() => {
+          initIntersectionObserver();
+        });
+      }else{
+        hasMore.value = false;
+      }
+      // logs.value = res.result.data;
     }
   });
 }
 
-function del(id) {
+// 初始化交叉观察器（用于懒加载）
+const initIntersectionObserver = () => {
+  // 先销毁已存在的观察器
+  if (observer.value) {
+    observer.value.disconnect();
+  }
+  
+  // 创建新的交叉观察器
+  observer.value = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      // 元素进入视口且未加载视频时，触发加载
+      if (entry.isIntersecting) {
+        const index = entry.target.dataset.index;
+        if (index !== undefined && !videoList.value[index].isLoaded) {
+          loadVideo(Number(index));
+        }
+      }
+    });
+  }, {
+    rootMargin: '200px 0px',  // 提前200px开始加载
+    threshold: 0.1
+  });
+
+  // 加载指定索引的视频
+  const loadVideo = (index) => {
+    // 标记视频为已加载，触发视频播放器渲染
+    videoList.value[index].isLoaded = true;
+  };
+  
+  // 监听所有视频项
+  videoItems.value.forEach((el, index) => {
+    if (el) {
+      el.dataset.index = index;
+      observer.value.observe(el);
+    }
+  });
+};
+
+const handleConfirm = (data) => {
+  console.log('点击了确认',data)
+  showModal.value = false;
   CommonService.del({
     vuid: vuid.value,
     token: token.value,
-    id: id,
+    id: data.selectId,
     projectId: projectId.value
   }).then(res => {
     if (res.code === '000000') {
@@ -49,30 +143,72 @@ function del(id) {
   });
 }
 
+function handleCancel() {
+  console.log('点击了 取消')
+  showModal.value = false;
+}
+
+function del(id) {
+  showModal.value = true;
+  selectId.value = id;
+}
+
 const closeLog = () => {
   router.back();
+};
+
+// 监听滚动事件，实现滚动加载更多
+const handleScroll = () => {
+  console.log('999', isLoading.value)
+
+  // 避免频繁触发
+  if (isLoading.value) return;
+  
+  // 计算滚动到底部的距离（50px内）
+  const container = scrollContainer.value;
+  const scrollTop = container.scrollTop;
+  const scrollHeight = container.scrollHeight;
+  const clientHeight = container.clientHeight;
+  
+  console.log('88888', scrollTop + clientHeight >= scrollHeight - 50)
+  if (scrollTop + clientHeight >= scrollHeight - 50) {
+    getHistory();
+  }
 };
 
 </script>
 
 <template>
     <div class="index-container">
-    <div class="logs open">
-        <div class="title">
-        <div @click="closeLog"><img src="../assets/btn_back.png" alt=""></div>
-        <div>创作记录</div>
+    <div class="logs open" ref="scrollContainer">
+      <div class="title">
+        <div @click="closeLog">
+          <img src="../assets/btn_back.png" alt=""></div>
+          <div>创作记录</div>
         </div>
         <div class="log-list">
-        <div class="list-con">
-            <div class="p-item" v-for="item in logs" :key="item.id">
-            <div class="cover">
-                <video :src="item.resultUrl" :poster="item.coverImg" controls></video>
+          <div class="list-con">
+            <div  ref="videoItems" class="p-item" v-for="item in videoList" :key="item.id">
+              <div class="cover">
+                  <video :src="item.resultUrl" :poster="item.coverImg" controls></video>
+              </div>
+              <div class="btn">
+                  <div @click="del(item.id)">删除</div>
+              </div>
+              <DelDialog 
+                v-model:visible="showModal"
+                title="删除提示"
+                :selectId="selectId"
+                @confirm="handleConfirm"
+                @cancel="handleCancel"
+              >
+                <!-- 插槽内容 - 自定义弹框内容 -->
+                <view>
+                  <text >删除后将无法恢复，是否确认删除？</text>
+                </view>
+              </DelDialog>
             </div>
-            <div class="btn">
-                <div @click="del(item.id)">删除</div>
-            </div>
-            </div>
-        </div>
+          </div>
         </div>
     </div>
     </div>
@@ -466,4 +602,4 @@ const closeLog = () => {
     }
   }
 }
-</style>
+</style>@/components/DelDialog.vue

@@ -1,50 +1,123 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted,watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { CommonService } from '@/api/api.js';
+import { useAudioStore } from '@/store/modules/audioStore'; // 导入 Pinia 状态
+import axios from 'axios'
 
 const route = useRoute();
 const router = useRouter();
-
+const audioStore = useAudioStore();
+let audioFormData = null;
+let relatedParams = null;
 let backVideo = ref(false);
+let backVideFalse = ref(false);
 let videoUrl = ref('');
 let coverUrl = ref('');
+let errorMsg = ref('');
+let isRequesting = ref(false);
+let progressTimer = null;         // 进度更新计时器
 
+const imgUrl = ref(route.query.url);
+// const file = ref(route.query.audio);
+const avatarId = ref(route.query.avatarId);
+const musicId = ref(route.query.musicId);
+const projectId = ref(route.query.projectId);
+const token = ref(route.query.token);
+const vuid = ref(route.query.vuid);
+const taskId = ref(route.query.taskId);
 onMounted(() => {
-  const data = history.state;
-
+  // const data = history.state;
   history.replaceState(null, '', location.pathname);
 
-  if (data && data.musicId && data.avatarId) {
-    createAudio(data.musicId, data.avatarId, data.vuid, data.token, data.projectId);
-  } else {
-    console.error('Create page loaded without necessary data.');
-  }
-});
+  // 1. 从 Pinia 获取 FormData 和关联参数
+  audioFormData = audioStore.audioFormData;
+  relatedParams = audioStore.audioRelatedParams;
 
-function createAudio(musicId, avatarId, vuid, token, projectId) {
-  CommonService.createAudio({
-    musicId,
-    avatarId,
-    vuid,
-    token,
-    projectId
-  }).then(res => {
-    console.log(res);
-    setTimeout(() => {
-      if (res.code === '000000') {
-        videoUrl.value = res.result.resultUrl;
-        coverUrl.value = res.result.avatarUrl;
-        backVideo.value = true;
+  // 2. 验证数据（避免未存储就访问）
+  if (!audioFormData) {
+    console.error('未获取到音频 FormData，请先完成录音并存储状态');
+    // 可选：跳回上一页
+    // router.back();
+    return;
+  }
+  console.log('relatedParams', relatedParams.token)
+  uploadAudio(audioFormData, relatedParams.token);
+
+  // if (musicId && avatarId&&file) {
+  //   createAudio(musicId.value,avatarId.value, vuid.value, token.value, projectId.value,file.value);
+  // } else {
+  //   console.error('Create page loaded without necessary data.');
+  // }
+});
+// 用 FormData 上传接口
+const uploadAudio = async (formData, token) => {
+//   const queryParams = {
+//     fileName: 'file.webm',
+//   };
+//  const obj={
+//     vuid:relatedParams.vuid,
+//     pageSize:10,
+//     pageNum:1,
+//  } 
+//   Object.entries(queryParams).forEach(([key, value]) => {
+//     audioFormData.append(key, value); // 如添加 token、projectId 等
+//   });
+//   audioFormData.append('Qo', JSON.stringify(obj));
+  try {
+    const response = await fetch('/api/api/userMusic/create', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}` // 从关联参数获取 token
+      },
+      body: formData // 直接使用从 Pinia 获取的 FormData
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      // 000000  创建成功  40001, "您已加入队列，请稍后" 50002,"任务在生成中，请稍等" 10002, "生成完成"
+      if(result.code == '000000'|| result.code == '10002'|| result.code == '40001'|| result.code == '50002'){
+        progressTimer = setInterval(fetchResultList, 2000);
       }
-    }, 2500);
-  }).catch(err => {
-    console.error('API call failed:', err);
-  });
-}
+    } else {
+      throw new Error('上传失败');
+    }
+  } catch (err) {
+    backVideo.value = false;
+    backVideFalse.value = true;
+    clearTimeout(progressTimer);
+    console.error('上传错误：', err);
+  }
+};
+const fetchResultList = async (data = {}) => {
+  try {
+    isRequesting = true;
+    const response = await axios.post('/api/userMusic/getResult', {
+      vuid:vuid.value,
+      token:token.value,
+    });
+    console.log('response', response)
+    if(response.data.result.status == '2'){
+      backVideo.value = false;
+      backVideFalse.value = false;
+      videoUrl.value = response.data.result.resultUrl;
+      backVideo.value = true;
+      coverUrl.value = imgUrl.value;
+      clearInterval(progressTimer);
+    }
+    return response.data;
+  } catch (error) {
+    clearTimeout(progressTimer);
+    console.error('失败：', error.message);
+    throw error; // 抛出错误供外部处理
+  } finally {
+    isRequesting = false; // 无论成败，重置请求状态
+  }
+};
 
 const backCreate = () => {
-  router.back();
+  // router.back();
+  router.push({ name: 'MainPage' });
 };
 
 function publicVideo() {
@@ -56,19 +129,36 @@ function publicVideo() {
 <template>
   <div class="index-container">
     <div class="created">
-      <div class="loading" v-if="!backVideo">
+      <div class="loading" v-if="!backVideo&&!backVideFalse">
         <img src="../assets/loading.png" alt="">
         <p>正在生成中，请耐心等待</p>
       </div>
-      <div class="video-con" v-if="backVideo">
-        <div class="back-icon" @click="backCreate"><img src="../assets/btn_back.png" alt=""></div>
-        <video :src="videoUrl" controls playsinline></video>
-        <div class="bottom-btn">
-          <div class="create-btn" @click="backCreate">
+      <div class="failPage" v-if="!backVideo&&!!backVideFalse">
+        <div class="loading">
+          <img src="../assets/fail.png" alt="">
+          <p>生成失败，请重新生成</p>
+          <p style="font-size: 14px;margin-top:8px;">原因:{{ errorMsg }}</p>
+        </div>
+        <div class="bottom-btnAgain">
+          <div class="create-btn" @click="backCreate" v-if="!backVideo&&!!backVideFalse">
             <div>重新创作</div>
           </div>
+        </div>
+      </div>
+      <div class="video-con" v-if="backVideo">
+        <div class="back-icon" @click="backCreate">
+          <img src="../assets/btn_back.png" alt="">
+        </div>
+        <video :src="videoUrl" controls playsinline></video>
+        <div class="bottom-btn">
+          <!-- <div class="create-btn" @click="backCreate" v-if="!backVideo&&!!backVideFalse">
+            <div>重新创作</div>
+          </div> -->
           <div class="create-btn" @click="publicVideo">
             <div>发布视频</div>
+          </div>
+          <div class="ai_msg">
+            <img src="../assets/ai_msg.png" alt="">
           </div>
         </div>
       </div>
@@ -77,6 +167,14 @@ function publicVideo() {
 </template>
 
 <style scoped lang="less">
+.ai_msg{
+  margin-top: 10px;
+}
+.ai_msg img{
+  width: 70px;
+  height: 23px;
+  margin-left: -41px;
+}
 .play-video-modal{
   width: 100vw;
   height: 100vh;
@@ -391,6 +489,9 @@ function publicVideo() {
     z-index: 2;
     top: 0;
     left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     >video{
       width: 100%;
       height: auto;
@@ -398,6 +499,14 @@ function publicVideo() {
       top: 0;
       left: 0;
     }
+    // >img{
+    //   width: 100%;
+    //   height: auto;
+    //   position: absolute;
+    //   top: 0;
+    //   left: 0;
+    //   margin:0 auto
+    // }
     .log-btn{
       width: 120px;
       height: 30px;
@@ -427,20 +536,19 @@ function publicVideo() {
       }
     }
   }
-  .bottom-btn{
+  .bottom-btnAgain{
     display: flex;
-    flex-direction: column;
+    // flex-direction: column;
     position: absolute;
     z-index: 3;
-    bottom: 24px;
+    bottom: 70px;
     left: 50%;
     transform: translateX(-50%);
   }
   .create-btn{
-    margin-bottom: 16px;
+    // margin-bottom: 16px;
     &:first-child{
       background: transparent;
-
       border: 2px solid #fff;
       border-radius: 25px;
       color: #fff;
@@ -448,6 +556,28 @@ function publicVideo() {
         background-image: none;
       }
     }
+  }
+  .bottom-btn{
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    z-index: 3;
+    bottom: 65px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .create-btn{
+    // margin-bottom: 16px;
+    // &:first-child{
+    //   background: transparent;
+
+    //   border: 2px solid #fff;
+    //   border-radius: 25px;
+    //   color: #fff;
+    //   >div{
+    //     background-image: none;
+    //   }
+    // }
   }
   .loading{
     font-size: 18px;
@@ -462,6 +592,12 @@ function publicVideo() {
       height: 84px;
       margin-bottom: 16px;
     }
+  }
+  .failPage{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    
   }
 }
 </style>

@@ -2,6 +2,8 @@
 import {nextTick, onMounted, ref} from 'vue'
 import {CommonService} from "@/api/api.js";
 import { useRouter } from 'vue-router'
+import msgDialog from '@/components/msgDialog.vue'
+import axios from 'axios';
 
 const router = useRouter()
 
@@ -17,13 +19,26 @@ let token = ref('')
 let pid = ref('')
 let uid = ref('')
 let url = 'https://migu-aimusic.yangshipin.cn/?btoken=e84c5a82da156094905673e4a95d153d&vuid=8918612acaf0e889bd7253c827f1ca79&projectId=AI_YS_WSGW&releaseId=81546853&cfrom=AI_YS_WSGW'
+let showFlag = ref(false)
+let resultUrl = ref('')
+let  taskId = ref('')
+
 onMounted(() => {
   token.value = getUrlParam('btoken')
   pid.value = getUrlParam('projectId')
   uid.value = getUrlParam('vuid')
+  // window.location.href = 'http://10.16.7.103:8082/?btoken=9968dc3387845808ff0e9e0b556fbfe6&vuid=a20303f0098a1a3c14fc02fd432fd430&projectId=AI_YS_WSGW&releaseId=81546853&cfrom=AI_YS_WSGW'
   checkLogin()
+  const taskId = localStorage.getItem('taskId');
+  const imgUrl = localStorage.getItem('imgUrl');
+  console.log('taskId', taskId)
+  console.log('imgUrl', imgUrl)
+  if (!!taskId&&!!imgUrl) {
+    goRuter()
+  }
 })
 function checkLogin() {
+  
   CommonService.checkLogin({
     "vuid":uid.value,
     "token":token.value,
@@ -36,6 +51,7 @@ function checkLogin() {
     } else {
       window.location.href = 'https://y.migu.cn/app/v5/p/ai-charging/index.html?appId=e88c86edee570fdc525f1dfb3ed95823&schannel=014X031&projectId=AI_YS_WSGW&releaseId=81546853'
     }
+    
   }).catch(err => {
     console.log(err);
   })
@@ -63,6 +79,7 @@ function getMaterial() {
       currentSel.value.musicId = musicList.value[0].id
       currentPreviewImg.value = avatorList.value[0].url
       currentSel.value.avatarId = avatorList.value[0].id
+      localStorage.setItem('url', currentPreviewImg.value);
     }
   })
 }
@@ -80,12 +97,14 @@ const clickM = (mid) => {
 }
 const clickA = (data) => {
   currentSel.value.avatarId = data.id
-  currentPreviewImg.value = data.url
+  currentPreviewImg.value = data.url   
+  localStorage.setItem('url', currentPreviewImg.value);
 }
 const choosePreview = (data) => {
   currentSel.value.avatarId = data.avatarId
   currentSel.value.musicId = data.musicId
   currentPreviewImg.value = data.avatarUrl
+  localStorage.setItem('url', currentPreviewImg.value);
   nextTick(() => {
     const currentImgElement = document.querySelector('.current-img')
     if (currentImgElement) {
@@ -95,16 +114,49 @@ const choosePreview = (data) => {
 }
 
 function createAudio() {
-  console.log(currentSel.value);
+  console.log('当前选择的', import.meta.env.VITE_BASE_URL)
+  taskId.value = window.location.href.match(/taskId=(\w+)/)?.[1];
+  if(!!taskId.value){
+    localStorage.setItem('taskId', taskId.value);
+    console.log('taskId', taskId.value)
+    goRuter()
+  }else{
+    const url = 'https://migu-aimusic.yangshipin.cn/testenvironment/?'+window.location.href.split('?')[1]
+    const paramsUrl = encodeURIComponent(url)
+    const resultUrl = 'https://y.migu.cn/app/v5/p/ai-charging/index.html?' + `appId=e88c86edee570fdc525f1dfb3ed95823&schannel=014X031&cburl=${paramsUrl}`+ `projectId=AI_YS_WSGW#/task-id`
+    window.location.href = resultUrl
+    setTimeout(() => {
+      goRuter()
+    }, 2000)
+  }   
+}
+function goRuter() {
   const data = {
+    ...avatorList.value,
     ...currentSel.value,
     vuid: uid.value,
     token: token.value,
-    projectId: pid.value
+    projectId: pid.value,
+    // taskId: taskId.value
   };
+  console.log('data', data)
+  // router.push({ 
+  //   path: '/create', 
+  //   state: data
+  // });
+  // return
   router.push({ 
-    path: '/create', 
-    state: data
+    path: '/makeSound', 
+    state: data,
+    query: { 
+      // url: currentPreviewImg.value,
+      avatarId:data.avatarId,
+      musicId:data.musicId,
+      projectId:data.projectId,
+      token:data.token,
+      vuid:data.vuid,
+      // taskId: taskId.value
+    }
   });
 }
 
@@ -130,11 +182,39 @@ function getUrlParam(name) {
 function playVideo(url) {
   router.push({ path: '/video', query: { url: url } });
 }
+// 点击应用提示
+function getReasons() {
+  showFlag.value = true
+}
+const handleConfirm = () => {
+  console.log('点击了确认')
+  showFlag.value = false;
+}
 </script>
 
 <template>
   <div class="index-container">
     <div class="content">
+      <div class="log_msg" @click="getReasons">
+        <img src="../assets/fail.png" alt="">
+        应用说明
+      </div>
+      <msgDialog 
+        v-model:visible="showFlag"
+        title="应用提示"
+        position="center"
+        confirmText="我知道了"
+        @confirm="handleConfirm"
+      >
+        <!-- 插槽内容 - 自定义弹框内容 -->
+        <view>
+          <p class="reasons_tit">应用说明</p>
+          <text >1、本服务由咪咕音乐提供，需要登录咪咕音乐账号后方可使用。<br>
+2、应用在标注“活动体验”期间无需支付使用费用，一般情况下，每位用户有3次体验次数。体验期结束后，服务将根据 AI 技术研发投入及算力成本进行收费。<br>
+3、用户可下载咪咕音乐APP，或至咪咕彩媒微信小程序体验更多功能与模板。<br>
+4、使用中如有疑问，可以到咪咕音乐APP-我的-左上角三横线-帮助与客服，输入“人工”联系客服咨询，客服服务时间08:30-22:00，节假日无休。</text>
+        </view>
+      </msgDialog>
       <div class="log-btn" @click="openLog">创作记录</div>
       <div class="choose">
         <div class="tit-img"><img src="../assets/tit-1.png" alt=""></div>
@@ -181,6 +261,12 @@ function playVideo(url) {
 </template>
 
 <style scoped lang="less">
+.reasons_tit{
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+
+}
 .play-video-modal{
   width: 100vw;
   height: 100vh;
@@ -234,6 +320,28 @@ function playVideo(url) {
   padding: 16.5vh 5vw;
   position: relative;
   padding-bottom: 10vh;
+  .log_msg{
+    width: 100px;
+    height: 30px;
+    line-height: 30px;
+    background: #0d0c0c;
+    text-align: right;
+    border-radius: 30px;
+    position: absolute;
+    right: 100px;
+    top: 24px;
+    z-index: 2;
+    color: #fff;
+    opacity: 0.7;
+    padding-right: 7px;
+    img{
+      width: 20px;
+      height: 20px;
+      display: block;
+      margin: 5px 0 5px 8px;
+      position: absolute;
+    }
+  }
   .log-btn{
     width: 120px;
     height: 30px;

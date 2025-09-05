@@ -8,6 +8,7 @@ axios.defaults.timeout = 600000;
 // @ts-ignore
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL
 let token = ''
+let sapi = '/api'
 // http request 拦截器
 axios.interceptors.request.use(
     config => {
@@ -48,7 +49,7 @@ export function request(url='', params={}, type='POST', responseType='') {
         let promise
         if(type.toUpperCase() === 'GET') {
             // @ts-ignore
-            promise = axios({url: '/api'+url, params, responseType: responseType})
+            promise = axios({url: sapi+url, params, responseType: responseType})
         } else {
             // @ts-ignore
             promise = axios({
