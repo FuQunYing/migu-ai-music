@@ -10,7 +10,7 @@ const routes = [
     redirect: '/MainPage',
   },
   {
-    path: '/',
+    path: '/MainPage',
     name: 'MainPage',
     component: MainPage
   },
@@ -38,7 +38,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHashHistory(), 
+  history: createWebHistory(),
   routes
 })
 

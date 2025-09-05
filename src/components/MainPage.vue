@@ -29,16 +29,10 @@ onMounted(() => {
   uid.value = getUrlParam('vuid')
   // window.location.href = 'http://10.16.7.103:8082/?btoken=9968dc3387845808ff0e9e0b556fbfe6&vuid=a20303f0098a1a3c14fc02fd432fd430&projectId=AI_YS_WSGW&releaseId=81546853&cfrom=AI_YS_WSGW'
   checkLogin()
-  const taskId = localStorage.getItem('taskId');
-  const imgUrl = localStorage.getItem('imgUrl');
-  console.log('taskId', taskId)
-  console.log('imgUrl', imgUrl)
-  if (!!taskId&&!!imgUrl) {
-    goRuter()
-  }
+
 })
 function checkLogin() {
-  
+
   CommonService.checkLogin({
     "vuid":uid.value,
     "token":token.value,
@@ -51,7 +45,7 @@ function checkLogin() {
     } else {
       window.location.href = 'https://y.migu.cn/app/v5/p/ai-charging/index.html?appId=e88c86edee570fdc525f1dfb3ed95823&schannel=014X031&projectId=AI_YS_WSGW&releaseId=81546853'
     }
-    
+
   }).catch(err => {
     console.log(err);
   })
@@ -64,8 +58,8 @@ const openLog = () => {
     token: token.value,
     projectId: pid.value
   };
-  router.push({ 
-    path: '/logs', 
+  router.push({
+    path: '/logs',
     state: data
   });
 }
@@ -80,6 +74,14 @@ function getMaterial() {
       currentPreviewImg.value = avatorList.value[0].url
       currentSel.value.avatarId = avatorList.value[0].id
       localStorage.setItem('url', currentPreviewImg.value);
+
+      const taskId = localStorage.getItem('taskId') ?  window.location.href.match(/taskId=(\w+)/)?.[1] : '';
+      const imgUrl = localStorage.getItem('url')
+      console.log('taskId', taskId)
+      console.log('imgUrl', imgUrl)
+      if (!!taskId&&!!imgUrl) {
+        goRuter()
+      }
     }
   })
 }
@@ -97,7 +99,7 @@ const clickM = (mid) => {
 }
 const clickA = (data) => {
   currentSel.value.avatarId = data.id
-  currentPreviewImg.value = data.url   
+  currentPreviewImg.value = data.url
   localStorage.setItem('url', currentPreviewImg.value);
 }
 const choosePreview = (data) => {
@@ -128,7 +130,7 @@ function createAudio() {
     setTimeout(() => {
       goRuter()
     }, 2000)
-  }   
+  }
 }
 function goRuter() {
   const data = {
@@ -140,15 +142,15 @@ function goRuter() {
     // taskId: taskId.value
   };
   console.log('data', data)
-  // router.push({ 
-  //   path: '/create', 
+  // router.push({
+  //   path: '/create',
   //   state: data
   // });
   // return
-  router.push({ 
-    path: '/makeSound', 
+  router.push({
+    path: '/makeSound',
     state: data,
-    query: { 
+    query: {
       // url: currentPreviewImg.value,
       avatarId:data.avatarId,
       musicId:data.musicId,
@@ -199,7 +201,7 @@ const handleConfirm = () => {
         <img src="../assets/fail.png" alt="">
         应用说明
       </div>
-      <msgDialog 
+      <msgDialog
         v-model:visible="showFlag"
         title="应用提示"
         position="center"
