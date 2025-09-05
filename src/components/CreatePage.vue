@@ -117,7 +117,7 @@ const fetchResultList = async (data = {}) => {
 
 const backCreate = () => {
   // router.back();
-  router.push({ path: 'mainPage' });
+  router.push({ path: '/mainPage' });
 };
 
 function publicVideo() {
