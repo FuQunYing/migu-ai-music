@@ -1,16 +1,13 @@
-import { createRouter, createWebHistory,createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import MainPage from '../components/MainPage.vue'
 import CreatePage from '../components/CreatePage.vue'
 import LogPage from '../components/LogPage.vue'
 import VideoPage from '../components/VideoPage.vue'
 import MakeSound from '../components/MakeSound.vue' // 录制声音
+
 const routes = [
   {
-    path: '',
-    redirect: '/MainPage',
-  },
-  {
-    path: '/MainPage',
+    path: '/',
     name: 'MainPage',
     component: MainPage
   },
@@ -38,7 +35,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/testenvironment/'), 
   routes
 })
 
