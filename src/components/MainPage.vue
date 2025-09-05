@@ -119,18 +119,29 @@ function createAudio() {
   console.log('当前选择的', import.meta.env.VITE_BASE_URL)
   taskId.value = window.location.href.match(/taskId=(\w+)/)?.[1];
   console.log('taskId.value', taskId.value)
-  if(!!taskId.value){
-    localStorage.setItem('taskId', taskId.value);
-    goRuter()
+  // if(!taskId.value&&!window.location.href.split('?')[1]){
+  //   localStorage.setItem('taskId', taskId.value);
+   
+  // }else 
+  
+  if((!taskId.value&&!window.location.href.split('?')[1])||(!!window.location.href.split('?')[1]&&!taskId.value)){
+    if(!!window.location.href.split('?')[1]){
+      const filterUrl = window.location.href.split('?')[1].split('#/mainPage','&')
+      const result = ''
+      if (filterUrl.includes(":8080")) {
+        result = str.replace(":8080", "");
+      } 
+      const url = 'https://migu-aimusic.yangshipin.cn/?'+ result
+      const paramsUrl = encodeURIComponent(url)
+      const resultUrl = 'https://y.migu.cn/app/v5/p/ai-charging/index.html?' + `appId=e88c86edee570fdc525f1dfb3ed95823&schannel=014X031&cburl=${paramsUrl}`+ `&projectId=AI_YS_WSGW#/task-id`
+      window.location.href = resultUrl
+      localStorage.setItem('taskId', taskId.value);
+      setTimeout(() => {
+        goRuter()
+      }, 2000)
+    }
   }else{
-    const url = 'https://migu-aimusic.yangshipin.cn/testenvironment?'+window.location.href.split('?')[1]
-    const paramsUrl = encodeURIComponent(url)
-    const resultUrl = 'https://y.migu.cn/app/v5/p/ai-charging/index.html?' + `appId=e88c86edee570fdc525f1dfb3ed95823&schannel=014X031&cburl=${paramsUrl}`+ `projectId=AI_YS_WSGW#/task-id`
-    window.location.href = resultUrl
-    localStorage.setItem('taskId', taskId.value);
-    setTimeout(() => {
-      goRuter()
-    }, 2000)
+    goRuter()
   }
 }
 function goRuter() {

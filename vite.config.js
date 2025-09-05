@@ -17,7 +17,7 @@ export default defineConfig({
   plugins: [
     vue(),
   ],
-  base: '/testenvironment/',
+  base: './',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -31,17 +31,17 @@ export default defineConfig({
 
     proxy: {
       '/api': {
-        // target: 'https://migu-aimusic.yangshipin.cn/',
+        target: 'https://migu-aimusic.yangshipin.cn/',
         // target: 'http://10.16.7.0:8989/',
         // target: 'http://10.16.7.0:8989/',
         // target: back_end_base_uri,
-        target:'https://migu-aimusic.yangshipin.cn/',
+        // target:'http://10.5.101.152:8787/',
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/api/, ''),
         // 测试环境👇🏻
         rewrite: (path) => {
           console.log('原始路径:', path); // 打印原始路径
-          const newPath = path.replace(/^\/api/, 'testenvironment/api');
+          const newPath = path.replace(/^\/api/, '');
           console.log('重写后路径:', newPath); // 打印重写后路径
           return newPath;
         },
