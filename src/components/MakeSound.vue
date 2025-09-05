@@ -202,7 +202,7 @@ const createAudio = () => {
 }
 
 const backCreate = () => {
-  router.push({ name: 'MainPage' });
+  router.push({ path: '/mainPage' });
 };
 
 const closeLog = () => {

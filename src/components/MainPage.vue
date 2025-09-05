@@ -120,9 +120,7 @@ function createAudio() {
   taskId.value = window.location.href.match(/taskId=(\w+)/)?.[1];
   console.log('taskId.value', taskId.value)
   if(!!taskId.value){
-    // url = 'https://migu-aimusic.yangshipin.cn/testenvironment/makeSound?'+window.location.href.split('?')[1]
     localStorage.setItem('taskId', taskId.value);
-    console.log('taskId', taskId.value)
     goRuter()
   }else{
     const url = 'https://migu-aimusic.yangshipin.cn/testenvironment?'+window.location.href.split('?')[1]
