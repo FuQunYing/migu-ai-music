@@ -75,9 +75,9 @@ const uploadAudio = async (formData, token) => {
 
     if (response.ok) {
       const result = await response.json();
-      // 000000  创建成功  40001, "您已加入队列，请稍后" 50002,"任务在生成中，请稍等" 10002, "生成完成"
+      // 000000  创建成功  40001, "您已加入队列，请稍后" 50002,"任务在生成中，请稍等" 10002, "生成完成" 200 创建成功  
       if(result.code == '000000'|| result.code == '10002'|| result.code == '40001'|| result.code == '50002'||result.code == '200'){
-        progressTimer = setInterval(fetchResultList, 2000);
+        progressTimer = setInterval(fetchResultList, 10000);
       }else{
         backVideo.value = false;
         backVideFalse.value = true;
@@ -100,16 +100,23 @@ const fetchResultList = async (data = {}) => {
       token:token.value,
     });
     console.log('response', response)
-    if(response.data.result.status == '2'){
+    if(response.data.result.status == 2){
       backVideFalse.value = false;
       videoUrl.value = response.data.result.resultUrl;
-      backVideo.value = false;
+      backVideo.value = true;
       coverUrl.value = imgUrl.value;
       clearInterval(progressTimer);
-    }else{
+    }else if(response.data.result.status == 3){
       backVideo.value = false;
       backVideFalse.value = true;
+      errorMsg = '生成失败，请稍后重试'
+      clearInterval(progressTimer);
+    }else{
+      // 继续轮询 1  40001
+      backVideFalse.value = false;
+      backVideo.value = false;
     }
+     
     return response.data;
   } catch (error) {
     clearTimeout(progressTimer);
@@ -122,7 +129,7 @@ const fetchResultList = async (data = {}) => {
 
 const backCreate = () => {
   // router.back();
-  router.push({ path: '/mainPage' });
+  router.push({ name: 'MainPage' });
 };
 
 function publicVideo() {

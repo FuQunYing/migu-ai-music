@@ -102,7 +102,6 @@ onUnmounted(() => {
 
 onMounted(() => {
   // const stateData = history.state;
-
   console.log('avatarId', avatarId)
   console.log('musicId', musicId)
   console.log('projectId', projectId)
@@ -118,6 +117,7 @@ onMounted(() => {
     selectUrl = imgUrl;
     selectTaskId = taskId;
   }
+  
 });
 // 开始录音
 const beginSound = () => {
@@ -202,7 +202,7 @@ const createAudio = () => {
 }
 
 const backCreate = () => {
-  router.push({ path: '/mainPage' });
+  router.push({ name: 'MainPage' });
 };
 
 const closeLog = () => {

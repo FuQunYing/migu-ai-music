@@ -264,7 +264,7 @@ const blobToFormData = async (audioUrl, fileName) => {
   formData.append('token', props.token);
   formData.append('vuid', props.vuid);
   formData.append('taskId', taskId);
-  formData.append('projectId', AI_YS_WSGW);
+  formData.append('projectId', 'AI_YS_WSGW');
   // formData.append('fileName', 'file.webm');
   // objectNew.vuid = props.vuid
   // objectNew.pageSize = 10
