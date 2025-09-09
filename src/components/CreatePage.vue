@@ -19,13 +19,8 @@ let isRequesting = ref(false);
 let progressTimer = null;         // 进度更新计时器
 
 const imgUrl = ref(route.query.url);
-// const file = ref(route.query.audio);
-const avatarId = ref(route.query.avatarId);
-const musicId = ref(route.query.musicId);
-const projectId = ref(route.query.projectId);
 const token = ref(route.query.token);
 const vuid = ref(route.query.vuid);
-const taskId = ref(route.query.taskId);
 onMounted(() => {
   // const data = history.state;
   history.replaceState(null, '', location.pathname);
@@ -169,8 +164,13 @@ function publicVideo() {
           <div class="create-btn" @click="publicVideo">
             <div>发布视频</div>
           </div>
+        </div>
+        <div class="end_ai">
           <div class="ai_msg">
             <img src="../assets/ai_msg.png" alt="">
+          </div>
+          <div class="ai_span">
+            <span>内容由AI生成</span>
           </div>
         </div>
       </div>
@@ -179,13 +179,29 @@ function publicVideo() {
 </template>
 
 <style scoped lang="less">
+.end_ai{
+  display: flex;
+  align-items: center;
+}
 .ai_msg{
-  margin-top: 10px;
+  position: absolute;
+  z-index: 3;
+  bottom: 40px;
+  left: 80px;
+  // margin-top: 10px;
 }
 .ai_msg img{
   width: 70px;
   height: 23px;
   margin-left: -41px;
+}
+.ai_span{
+  position: absolute;
+  z-index: 3;
+  bottom: 45px;
+  right: 80px;
+  font-size: 18px;
+  color: #d1d1d1;
 }
 .play-video-modal{
   width: 100vw;
@@ -574,7 +590,7 @@ function publicVideo() {
     flex-direction: column;
     position: absolute;
     z-index: 3;
-    bottom: 65px;
+    bottom: 75px;
     left: 50%;
     transform: translateX(-50%);
   }

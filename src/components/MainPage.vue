@@ -29,6 +29,10 @@ onMounted(() => {
   pid.value = getUrlParam('projectId')
   currentSel.value.avatarId = localStorage.getItem('avatarId')?localStorage.getItem('avatarId'):'1'
   currentSel.value.musicId = localStorage.getItem('musicId')?localStorage.getItem('musicId'):'1'
+  localStorage.setItem('token', token.value)
+  localStorage.setItem('vuid', uid.value)
+  localStorage.setItem('avatarId',currentSel.value.avatarId);
+  localStorage.setItem('musicId',currentSel.value.musicId );
   if(!localStorage.getItem('url')&&!!currentSel.value.musicId){
     localStorage.setItem('url',`https://sapi.yangshipin.cn/api/x/cctv/migu-music/material/ `+`${currentSel.value.musicId}-pic.jpg`)
   }
@@ -89,6 +93,7 @@ function getMaterial() {
       currentPreviewImg.value = avatorList.value[0].url
       currentSel.value.avatarId = avatorList.value[0].id
       localStorage.setItem('url', currentPreviewImg.value);
+      
     }
   })
 }
@@ -134,8 +139,6 @@ function createAudio() {
       const paramsUrl = encodeURIComponent(url)
       const resultUrl = 'https://y.migu.cn/app/v5/p/ai-charging/index.html?' + `appId=e88c86edee570fdc525f1dfb3ed95823&schannel=014X031&cburl=${paramsUrl}`+ `&pm=hash&templateId=*&projectId=AI_YS_WSGW#/task-id`
       window.location.href = resultUrl
-      
-
       taskId.value = window.location.href.match(/taskId=(\w+)/)?.[1];
       localStorage.setItem('taskId', taskId.value);
     }
@@ -158,11 +161,11 @@ function goRuter() {
     state: data,
     query: {
       // url: currentPreviewImg.value,
-      avatarId:data.avatarId,
-      musicId:data.musicId,
-      projectId:data.projectId,
-      token:data.token,
-      vuid:getUrlParam('vuid')?getUrlParam('vuid'):data.vuid,
+      // avatarId:data.avatarId,
+      // musicId:data.musicId,
+      // projectId:data.projectId,
+      // token:data.token,
+      // vuid:getUrlParam('vuid')?getUrlParam('vuid'):data.vuid,
     }
   });
 }
@@ -651,7 +654,7 @@ const handleConfirm = () => {
     flex-direction: column;
     position: absolute;
     z-index: 3;
-    bottom: 24px;
+    bottom: 0;
     left: 50%;
     transform: translateX(-50%);
   }

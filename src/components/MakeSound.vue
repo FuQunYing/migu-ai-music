@@ -7,20 +7,15 @@ import SoundBegin from '@/components/soundBegin.vue'
 import { useAudioStore } from '@/store/modules/audioStore'; // 导入 Pinia 状态
 const router = useRouter();
 const route = useRoute();
-const avatarId = ref(route.query.avatarId);
-const musicId = ref(route.query.musicId);
-const projectId = ref(route.query.projectId);
-const token = ref(route.query.token);
-const vuid = ref(route.query.vuid);
+const avatarId = ref(localStorage.getItem('avatarId'));
+const musicId = ref(localStorage.getItem('musicId'));
+const token = ref(localStorage.getItem('token'));
+const vuid = ref(localStorage.getItem('vuid'));
 const audioStore = useAudioStore(); // 获取 Pinia 实例
 
-let logs = ref([]);
 let isFlag = ref(false);
 let audioUrl = ref('');// 音频地址  是返回 FormData 的 Promise
 
-// let vuid = ref('');
-// let token = ref('');
-// let projectId = ref('');
 let selectUrl = ref('');
 let selectTaskId = ref('');
 // 创建响应式变量
@@ -102,11 +97,10 @@ onUnmounted(() => {
 
 onMounted(() => {
   // const stateData = history.state;
-  console.log('avatarId', avatarId)
-  console.log('musicId', musicId)
-  console.log('projectId', projectId)
-  console.log('token', token)
-  console.log('vuid', vuid)
+  console.log('avatarId', localStorage.getItem('avatarId'))
+  console.log('musicId', localStorage.getItem('musicId'))
+  console.log('token', localStorage.getItem('token'))
+  console.log('vuid', localStorage.getItem('vuid'))
   // console.log('taskId', taskId)
   history.replaceState(null, '', location.pathname);
   const imgUrl = localStorage.getItem('url');
@@ -173,7 +167,6 @@ const handleEnd = (data) => {
         url: selectUrl,
         avatarId: avatarId,
         musicId: musicId,
-        projectId: projectId,
         token: token,
         vuid: vuid,
         taskId: selectTaskId
@@ -184,7 +177,6 @@ const handleEnd = (data) => {
           url: selectUrl,
           avatarId: avatarId.value,
           musicId: musicId.value,
-          projectId: projectId.value,
           token: token.value,
           vuid: vuid.value,
           taskId:selectTaskId,
@@ -314,7 +306,6 @@ const closeLog = () => {
                 v-model:visible="showFlag"
                 :avatarId="avatarId"
                 :musicId="musicId"
-                :projectId="projectId"
                 :token="token"
                 :vuid="vuid"
                 :taskId="taskId"
@@ -355,7 +346,7 @@ const closeLog = () => {
     height: 300px; 
     border-radius: 25px;
     overflow: hidden; 
-    top:50%
+    top:50px
   }
   .cover-img{
     width:100%;

@@ -68,10 +68,6 @@ const props = defineProps({
     type: String,
     default: ''
   },
-  projectId: {
-    type: String,
-    default: ''
-  },
   token: {
     type: String,
     default: ''
@@ -257,7 +253,6 @@ const blobToFormData = async (audioUrl, fileName) => {
   // formData.append('url', props.imgUrl); 
   formData.append('avatarId', props.avatarId); 
   formData.append('musicId', props.musicId);
-  // formData.append('projectId', props.projectId);
   formData.append('token', props.token);
   formData.append('vuid', props.vuid);
   formData.append('taskId', taskId);
