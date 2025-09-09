@@ -202,7 +202,8 @@ const createAudio = () => {
 }
 
 const backCreate = () => {
-  router.push({ name: 'MainPage' });
+  // router.push({ name: 'MainPage' });
+  isFlag.value = false;
 };
 
 const closeLog = () => {
@@ -221,7 +222,7 @@ const closeLog = () => {
           <div v-else></div>
           <div>录制声音</div>
         </div>
-        <div v-if="!!isFlag" style="display: flex;justify-content: center;">
+        <div v-if="!!isFlag" style="display: flex;justify-content: center; flex-direction: row;flex-wrap: nowrap;">
           <div class="audio-player">
             <div class="audio-cover">
               <img class="cover-img" :src="selectUrl" alt="音频封面">

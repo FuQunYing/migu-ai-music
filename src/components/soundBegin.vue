@@ -42,13 +42,9 @@
           </view>
           <view class="mic-icon"></view>
           <view class="record-status">
-            {{ isRecording ? '松开录制完毕' : '长按按钮开始录音' }}
+            {{ isRecording ? '点击录制完毕' : '点击按钮开始录音' }}
           </view>
         </view>
-       
-        
-
-        
       </view>
     </view>
   </view>
@@ -129,6 +125,7 @@ const getSupportedMimeType = () => {
   // 常用音频格式，按优先级排序
   const mimeTypes = [
     'audio/webm',
+    'audio/mp3',
     'audio/mp4',
     'audio/wav',
     'audio/ogg'
