@@ -27,14 +27,11 @@ onMounted(() => {
   token.value = getUrlParam('btoken')
   uid.value = getUrlParam('vuid')
   pid.value = getUrlParam('projectId')
-  currentSel.value.avatarId = localStorage.getItem('avatarId')?localStorage.getItem('avatarId'):'1'
-  currentSel.value.musicId = localStorage.getItem('musicId')?localStorage.getItem('musicId'):'1'
   localStorage.setItem('token', token.value)
   localStorage.setItem('vuid', uid.value)
-  localStorage.setItem('avatarId',currentSel.value.avatarId);
-  localStorage.setItem('musicId',currentSel.value.musicId );
-  if(!localStorage.getItem('url')&&!!currentSel.value.musicId){
-    localStorage.setItem('url',`https://sapi.yangshipin.cn/api/x/cctv/migu-music/material/ `+`${currentSel.value.musicId}-pic.jpg`)
+  
+  if(!localStorage.getItem('url')&&!!currentSel.value.avatarId){
+    localStorage.setItem('url',`https://sapi.yangshipin.cn/api/x/cctv/migu-music/material/`+`${currentSel.value.avatarId}-pic.jpg`)
   }
   if (localStorage.getItem('redirectToMakeSound') === 'true') {
     localStorage.removeItem('redirectToMakeSound');
@@ -42,11 +39,16 @@ onMounted(() => {
       // window.location.href.replace('mainPage','makeSound')
       taskId.value = window.location.href.match(/taskId=(\w+)/)?.[1];
       localStorage.setItem('taskId', taskId.value);
-      localStorage.setItem('url', 'https://sapi.yangshipin.cn/api/x/cctv/migu-music/material/1-pic.jpg');
+      currentSel.value.avatarId = localStorage.getItem('avatarId')?localStorage.getItem('avatarId'):'1'
+      currentSel.value.musicId = localStorage.getItem('musicId')?localStorage.getItem('musicId'):'1'
+      localStorage.setItem('avatarId',currentSel.value.avatarId);
+      localStorage.setItem('musicId',currentSel.value.musicId );
+      localStorage.setItem('url',`https://sapi.yangshipin.cn/api/x/cctv/migu-music/material/`+`${currentSel.value.avatarId}-pic.jpg`)
       goRuter()
     }
+  }else{
+    checkLogin()
   }
-  checkLogin()
   // window.location.href = 'http://10.16.7.103:8082/?btoken=9968dc3387845808ff0e9e0b556fbfe6&vuid=a20303f0098a1a3c14fc02fd432fd430&projectId=AI_YS_WSGW&releaseId=81546853&cfrom=AI_YS_WSGW'
 })
 function checkLogin() {
@@ -93,7 +95,8 @@ function getMaterial() {
       currentPreviewImg.value = avatorList.value[0].url
       currentSel.value.avatarId = avatorList.value[0].id
       localStorage.setItem('url', currentPreviewImg.value);
-      
+      localStorage.setItem('avatarId', '1');
+      localStorage.setItem('musicId', '1');
     }
   })
 }
@@ -102,6 +105,8 @@ function getPreviewList() {
     console.log('广场',res);
     if(res.code === '000000') {
       previewList.value = res.result
+      localStorage.setItem('avatarId', '1');
+      localStorage.setItem('musicId', '1');
     }
   })
 }

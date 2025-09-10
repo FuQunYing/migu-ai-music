@@ -51,6 +51,19 @@ onUnmounted(() => {
     observer.value.disconnect();
   }
 });
+function getList() {
+  CommonService.history({
+    vuid: vuid.value,
+    token: token.value,
+    projectId: projectId.value,
+    pageNum: 1,
+    pageSize: 12
+  }).then(res => {
+    if (res.code === '000000') {
+      videoList.value = res.result.data;
+    }
+  });
+}
 
 function getHistory() {
   console.log('hasMore.value', hasMore.value)
@@ -138,7 +151,7 @@ const handleConfirm = (data) => {
     projectId: projectId.value
   }).then(res => {
     if (res.code === '000000') {
-      getHistory();
+      getList();
     }
   });
 }
