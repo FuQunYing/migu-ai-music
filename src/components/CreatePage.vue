@@ -137,7 +137,7 @@ function publicVideo() {
   <div class="index-container">
     <div class="created">
       <div class="loading" v-if="!backVideo&&!backVideFalse">
-        <img src="../assets/loading.png" alt="">
+        <img src="../assets/loading.png" alt="" class="rotating-image">
         <p>正在生成中，请耐心等待</p>
       </div>
       <div class="failPage" v-if="!backVideo&&!!backVideFalse">
@@ -522,7 +522,7 @@ function publicVideo() {
     align-items: center;
     >video{
       width: 100%;
-      height: auto;
+      height: 100%;
       position: absolute;
       top: 0;
       left: 0;
@@ -620,6 +620,19 @@ function publicVideo() {
       height: 84px;
       margin-bottom: 16px;
     }
+  }
+  @keyframes rotate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* 旋转图片的样式 */
+  .rotating-image {
+    animation: rotate 3s linear infinite; /* 3秒钟转一圈，线性动画，永远循环 */
   }
   .failPage{
     display: flex;

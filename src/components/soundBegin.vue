@@ -404,7 +404,7 @@ onUnmounted(() => {
 
 .record-btn {
   width: 180px;
-  height: 165px;
+  height: 140px;
   /* border-radius: 50%; */
   /* background-color: #ff4d4f; */
   
