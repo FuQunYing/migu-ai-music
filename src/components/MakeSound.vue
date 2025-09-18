@@ -7,20 +7,15 @@ import SoundBegin from '@/components/soundBegin.vue'
 import { useAudioStore } from '@/store/modules/audioStore'; // 导入 Pinia 状态
 const router = useRouter();
 const route = useRoute();
-const avatarId = ref(route.query.avatarId);
-const musicId = ref(route.query.musicId);
-const projectId = ref(route.query.projectId);
-const token = ref(route.query.token);
-const vuid = ref(route.query.vuid);
+const avatarId = ref(localStorage.getItem('avatarId'));
+const musicId = ref(localStorage.getItem('musicId'));
+const token = ref(localStorage.getItem('token'));
+const vuid = ref(localStorage.getItem('vuid'));
 const audioStore = useAudioStore(); // 获取 Pinia 实例
 
-let logs = ref([]);
 let isFlag = ref(false);
-let audioUrl = ref('');// 音频地址  是返回 FormData 的 Promise
-
-// let vuid = ref('');
-// let token = ref('');
-// let projectId = ref('');
+let audioUrl = ref('');
+let playUrl = ref('');
 let selectUrl = ref('');
 let selectTaskId = ref('');
 // 创建响应式变量
@@ -53,7 +48,7 @@ const togglePlay = () => {
       console.error('音频播放失败：', err);
       alert('播放失败，请检查音频地址或浏览器权限');
     });
-  }
+  };
   isPlaying.value = !isPlaying.value;
 };
 
@@ -92,6 +87,7 @@ onUnmounted(() => {
   if (audio) {
     audio.pause();
     audio.src = ''; // 释放音频资源
+    audio.load();   // 确保资源释放
   }
   clearInterval(progressTimer);
 });
@@ -102,14 +98,11 @@ onUnmounted(() => {
 
 onMounted(() => {
   // const stateData = history.state;
-
-  console.log('avatarId', avatarId)
-  console.log('musicId', musicId)
-  console.log('projectId', projectId)
-  console.log('token', token)
-  console.log('vuid', vuid)
-  // console.log('taskId', taskId)
-  history.replaceState(null, '', location.pathname);
+  console.log('avatarId', localStorage.getItem('avatarId'))
+  console.log('musicId', localStorage.getItem('musicId'))
+  console.log('token', localStorage.getItem('token'))
+  console.log('vuid', localStorage.getItem('vuid'))
+  // history.replaceState(null, '', location.pathname);
   const imgUrl = localStorage.getItem('url');
   const taskId = localStorage.getItem('taskId');
   console.log('taskId', taskId)
@@ -118,9 +111,17 @@ onMounted(() => {
     selectUrl = imgUrl;
     selectTaskId = taskId;
   }
+  
 });
 // 开始录音
 const beginSound = () => {
+  const numberImg = Number(localStorage.getItem('avatarId'))
+  console.log('numberImg', numberImg)
+  if(!!localStorage.getItem('avatarId')){
+    localStorage.setItem('url',`https://sapi.yangshipin.cn/api/x/cctv/migu-music/material/`+`${numberImg}`+`-pic.jpg`)
+  }else{
+    localStorage.setItem('url','https://sapi.yangshipin.cn/api/x/cctv/migu-music/material/1-pic.jpg')
+  }
   // 检查是否选中
   if (isChecked.value) {
     console.log('录音开始',isChecked);
@@ -157,10 +158,21 @@ const getDefaultUrl = () => {
 // 录音完成
 const handleEnd = (data) => {
   console.log('录音完成，即将跳转页面...')
-  console.log('data', data)
-  isFlag.value = true;
-  audioUrl = data; // 录音的音频URL
+  console.log('data', data);
+    isFlag.value = true;
+    audioUrl = data.sendUrl
+    playUrl = data.audioUrl
+
+    // changePlayUrl();
 }
+// 跳转页面
+  const changePlayUrl =  async ()=>{
+    // 加载 ffmpeg.wasm
+    await ffmpeg.load()
+    // 将选择的文件传递给 ffmpeg
+    await ffmpeg.FS('writeFile', file.name, await fetchFile(file));
+
+  }
   // 跳转路由的方法（关键：先解析 Promise）
   const goToCreatePage = async () => {
     try {
@@ -173,7 +185,6 @@ const handleEnd = (data) => {
         url: selectUrl,
         avatarId: avatarId,
         musicId: musicId,
-        projectId: projectId,
         token: token,
         vuid: vuid,
         taskId: selectTaskId
@@ -184,7 +195,6 @@ const handleEnd = (data) => {
           url: selectUrl,
           avatarId: avatarId.value,
           musicId: musicId.value,
-          projectId: projectId.value,
           token: token.value,
           vuid: vuid.value,
           taskId:selectTaskId,
@@ -202,7 +212,8 @@ const createAudio = () => {
 }
 
 const backCreate = () => {
-  router.push({ path: '/mainPage' });
+  // router.push({ name: 'MainPage' });
+  isFlag.value = false;
 };
 
 const closeLog = () => {
@@ -221,7 +232,7 @@ const closeLog = () => {
           <div v-else></div>
           <div>录制声音</div>
         </div>
-        <div v-if="!!isFlag" style="display: flex;justify-content: center;">
+        <div v-if="!!isFlag" style="display: flex;justify-content: center; flex-direction: row;flex-wrap: nowrap;">
           <div class="audio-player">
             <div class="audio-cover">
               <img class="cover-img" :src="selectUrl" alt="音频封面">
@@ -231,14 +242,15 @@ const closeLog = () => {
                 <!-- <img v-else src="../assets/play.png" alt=""> -->
               </div>
             </div>
+            <!--  -->
             <audio 
               ref="audioRef"
-              :src="audioUrl" 
+              :src="playUrl" 
               controls 
               class="audio-player"
               @canplay="audioLoaded = true"  
               @ended="resetPlayState"  
-              style="display: none;"  
+              style="display: none;"
               >
             </audio>
           </div>
@@ -295,6 +307,10 @@ const closeLog = () => {
               </div>
               <div class="start" @click="beginSound">
                 <img src="../assets/start.png" alt="">
+                <!-- <audio controls>
+                  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+                  Your browser does not support the audio element.
+                </audio> -->
               </div>
               <!-- 引入自定义弹框 -->
               <CustomDialog 
@@ -313,7 +329,6 @@ const closeLog = () => {
                 v-model:visible="showFlag"
                 :avatarId="avatarId"
                 :musicId="musicId"
-                :projectId="projectId"
                 :token="token"
                 :vuid="vuid"
                 :taskId="taskId"
@@ -354,7 +369,7 @@ const closeLog = () => {
     height: 300px; 
     border-radius: 25px;
     overflow: hidden; 
-    top:50%
+    top:50px
   }
   .cover-img{
     width:100%;

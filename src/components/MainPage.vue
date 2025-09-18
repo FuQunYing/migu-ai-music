@@ -25,11 +25,31 @@ let  taskId = ref('')
 
 onMounted(() => {
   token.value = getUrlParam('btoken')
-  pid.value = getUrlParam('projectId')
   uid.value = getUrlParam('vuid')
+  pid.value = getUrlParam('projectId')
+  localStorage.setItem('token', token.value)
+  localStorage.setItem('vuid', uid.value)
+  
+  if(!localStorage.getItem('url')&&!!currentSel.value.avatarId){
+    localStorage.setItem('url',`https://sapi.yangshipin.cn/api/x/cctv/migu-music/material/`+`${currentSel.value.avatarId}-pic.jpg`)
+  }
+  if (localStorage.getItem('redirectToMakeSound') === 'true') {
+    localStorage.removeItem('redirectToMakeSound');
+    if(window.location.href.includes('mainPage')){
+      // window.location.href.replace('mainPage','makeSound')
+      taskId.value = window.location.href.match(/taskId=(\w+)/)?.[1];
+      localStorage.setItem('taskId', taskId.value);
+      currentSel.value.avatarId = localStorage.getItem('avatarId')?localStorage.getItem('avatarId'):'1'
+      currentSel.value.musicId = localStorage.getItem('musicId')?localStorage.getItem('musicId'):'1'
+      localStorage.setItem('avatarId',currentSel.value.avatarId);
+      localStorage.setItem('musicId',currentSel.value.musicId );
+      localStorage.setItem('url',`https://sapi.yangshipin.cn/api/x/cctv/migu-music/material/`+`${currentSel.value.avatarId}-pic.jpg`)
+      goRuter()
+    }
+  }else{
+    checkLogin()
+  }
   // window.location.href = 'http://10.16.7.103:8082/?btoken=9968dc3387845808ff0e9e0b556fbfe6&vuid=a20303f0098a1a3c14fc02fd432fd430&projectId=AI_YS_WSGW&releaseId=81546853&cfrom=AI_YS_WSGW'
-  checkLogin()
-
 })
 function checkLogin() {
 
@@ -42,6 +62,7 @@ function checkLogin() {
     if(res.code == '000000') {
       getMaterial()
       getPreviewList()
+      
     } else {
       window.location.href = 'https://y.migu.cn/app/v5/p/ai-charging/index.html?appId=e88c86edee570fdc525f1dfb3ed95823&schannel=014X031&projectId=AI_YS_WSGW&releaseId=81546853'
     }
@@ -74,14 +95,8 @@ function getMaterial() {
       currentPreviewImg.value = avatorList.value[0].url
       currentSel.value.avatarId = avatorList.value[0].id
       localStorage.setItem('url', currentPreviewImg.value);
-
-      // const taskId = localStorage.getItem('taskId') ?  localStorage.getItem('taskId') : window.location.href.match(/taskId=(\w+)/)?.[1];
-      // const imgUrl = localStorage.getItem('url')
-      // console.log('taskId', taskId)
-      // console.log('imgUrl', imgUrl)
-      // if (!!taskId&&!!imgUrl) {
-      //   goRuter()
-      // }
+      localStorage.setItem('avatarId', '1');
+      localStorage.setItem('musicId', '1');
     }
   })
 }
@@ -90,17 +105,21 @@ function getPreviewList() {
     console.log('广场',res);
     if(res.code === '000000') {
       previewList.value = res.result
+      localStorage.setItem('avatarId', '1');
+      localStorage.setItem('musicId', '1');
     }
   })
 }
 
 const clickM = (mid) => {
   currentSel.value.musicId = mid
+  localStorage.setItem('musicId', mid);
 }
 const clickA = (data) => {
   currentSel.value.avatarId = data.id
   currentPreviewImg.value = data.url
   localStorage.setItem('url', currentPreviewImg.value);
+  localStorage.setItem('avatarId', data.id);
 }
 const choosePreview = (data) => {
   currentSel.value.avatarId = data.avatarId
@@ -116,49 +135,23 @@ const choosePreview = (data) => {
 }
 
 function createAudio() {
-  console.log('当前选择的', import.meta.env.VITE_BASE_URL)
   taskId.value = window.location.href.match(/taskId=(\w+)/)?.[1];
   console.log('taskId.value', taskId.value)
-
-  // if((!taskId.value&&!window.location.href.split('?')[1])||(!!window.location.href.split('?')[1]&&!taskId.value)){
-    // if(!!window.location.href.split('?')[1]){
-      const filterUrl = window.location.href.split('?')[1].split('#/mainPage','&')
-      const result = `https://migu-aimusic.yangshipin.cn/?btoken=${token.value}`+`&vuid=${uid.value}`+'&projectId=AI_YS_WSGW&releaseId=81546853&cfrom=AI_YS_WSGW'
-      // if (filterUrl.includes(":8080")) {
-      //   result = str.replace(":8080", "");
-      // } 
-      // const url = 'https://migu-aimusic.yangshipin.cn/?'+ result
-      const paramsUrl = encodeURIComponent(result)
-      const resultUrl = 'https://y.migu.cn/app/v5/p/ai-charging/index.html?' + `appId=e88c86edee570fdc525f1dfb3ed95823&schannel=014X031&cburl=${paramsUrl}`+ `&projectId=AI_YS_WSGW#/task-id`
+  if((!taskId.value&&!window.location.href.split('?')[1])||(!!window.location.href.split('?')[1]&&!taskId.value)){
+    if(!!window.location.href.split('?')[1]){
+      localStorage.setItem('redirectToMakeSound', 'true');
+      const url = `https://migu-aimusic.yangshipin.cn/?btoken=${token.value}`+`&vuid=${uid.value}`+'&projectId=AI_YS_WSGW&releaseId=81546853&cfrom=AI_YS_WSGW'
+      const paramsUrl = encodeURIComponent(url)
+      const resultUrl = 'https://y.migu.cn/app/v5/p/ai-charging/index.html?' + `appId=e88c86edee570fdc525f1dfb3ed95823&schannel=014X031&cburl=${paramsUrl}`+ `&pm=hash&templateId=*&projectId=AI_YS_WSGW#/task-id`
       window.location.href = resultUrl
+      taskId.value = window.location.href.match(/taskId=(\w+)/)?.[1];
       localStorage.setItem('taskId', taskId.value);
-      setTimeout(() => {
-        goRuter()
-      }, 2000)
-    // }
-  // }else{
-  //   goRuter()
-  // }
-  
-  // if((!taskId.value&&!window.location.href.split('?')[1])||(!!window.location.href.split('?')[1]&&!taskId.value)){
-  //   if(!!window.location.href.split('?')[1]){
-  //     const filterUrl = window.location.href.split('?')[1].split('#/mainPage','&')
-  //     const result = ''
-  //     if (filterUrl.includes(":8080")) {
-  //       result = str.replace(":8080", "");
-  //     } 
-  //     const url = 'https://migu-aimusic.yangshipin.cn/?'+ result
-  //     const paramsUrl = encodeURIComponent(url)
-  //     const resultUrl = 'https://y.migu.cn/app/v5/p/ai-charging/index.html?' + `appId=e88c86edee570fdc525f1dfb3ed95823&schannel=014X031&cburl=${paramsUrl}`+ `&projectId=AI_YS_WSGW#/task-id`
-  //     window.location.href = resultUrl
-  //     localStorage.setItem('taskId', taskId.value);
-  //     setTimeout(() => {
-  //       goRuter()
-  //     }, 2000)
-  //   }
-  // }else{
-  //   goRuter()
-  // }
+    }
+  }else{
+    taskId.value = window.location.href.match(/taskId=(\w+)/)?.[1];
+    localStorage.setItem('taskId', taskId.value);
+    goRuter()
+  }
 }
 function goRuter() {
   const data = {
@@ -173,11 +166,11 @@ function goRuter() {
     state: data,
     query: {
       // url: currentPreviewImg.value,
-      avatarId:data.avatarId,
-      musicId:data.musicId,
-      projectId:data.projectId,
-      token:data.token,
-      vuid:data.vuid,
+      // avatarId:data.avatarId,
+      // musicId:data.musicId,
+      // projectId:data.projectId,
+      // token:data.token,
+      // vuid:getUrlParam('vuid')?getUrlParam('vuid'):data.vuid,
     }
   });
 }
@@ -666,7 +659,7 @@ const handleConfirm = () => {
     flex-direction: column;
     position: absolute;
     z-index: 3;
-    bottom: 24px;
+    bottom: 0;
     left: 50%;
     transform: translateX(-50%);
   }

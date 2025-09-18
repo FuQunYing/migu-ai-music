@@ -18,7 +18,8 @@
             :style="{ height: h + 'px' }"
           ></view>
         </view>
-        <view class="record-result" v-if="recordedBlob">
+        <!--  -->
+        <view class="record-result" v-if="recordedBlob.value">
           <!-- <view class="result-tip">录音已完成</view> -->
           <audio :src="audioUrl" controls class="audio-player"></audio>
         </view>
@@ -42,13 +43,9 @@
           </view>
           <view class="mic-icon"></view>
           <view class="record-status">
-            {{ isRecording ? '松开录制完毕' : '长按按钮开始录音' }}
+            {{ isRecording ? '点击录制完毕' : '点击按钮开始录音' }}
           </view>
         </view>
-       
-        
-
-        
       </view>
     </view>
   </view>
@@ -72,10 +69,6 @@ const props = defineProps({
     type: String,
     default: ''
   },
-  projectId: {
-    type: String,
-    default: ''
-  },
   token: {
     type: String,
     default: ''
@@ -92,7 +85,7 @@ const props = defineProps({
 // 录音状态
 const isRecording = ref(false);
 const recordDuration = ref(0);
-const recordedBlob = ref(null);
+const recordedBlob = ref(false);
 const audioUrl = ref('');
 const mediaRecorder = ref(null);
 const timer = ref(null);
@@ -101,7 +94,7 @@ const errorMessage = ref('');
 const sendUrl = ref('');
 const emitEvent = defineEmits(['close', 'update:visible', 'confirm'])
 const objectNew = ref({});
-
+const audioChunks = ref([]);
 // 格式化时间
 const formatTime = (seconds) => {
   const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -129,6 +122,7 @@ const getSupportedMimeType = () => {
   // 常用音频格式，按优先级排序
   const mimeTypes = [
     'audio/webm',
+    'audio/mp3',
     'audio/mp4',
     'audio/wav',
     'audio/ogg'
@@ -157,15 +151,29 @@ watch(isRecording, (newVal) => {
 
 const handleEnd = () => {
     console.log('录音结束',audioUrl)
+    if(recordDuration.value<2){
+      alert('录音时间太短，请重新录制')
+      recordedBlob.value = false;
+      clearInterval(timer.value);
+      return
+    }
     const mimeType = getSupportedMimeType();
     console.log('mimeType', mimeType.split('/')[1])
-    console.log('sendUrl', sendUrl)
+    // const blob = getBlobFromUrl(audioUrl.value);
+    // if (blob) {
+        // sendUrl.value = blobToFormData(blob, mimeType.split('/')[1]);
+    // }
+      const blob = new Blob(audioChunks.value, { type: mimeType });
+      sendUrl.value = blobToFormData(blob, mimeType.split('/')[1]);
+      console.log('sendUrl', sendUrl.value);
+      // 调用 emitEvent 传递 FormData
+      emitEvent('confirm', {audioUrl:audioUrl,sendUrl:sendUrl});
+    // console.log('sendUrl', sendUrl)
     // 格式化音频文件 转为 format-data 格式
-    emitEvent('confirm',sendUrl)
+    // emitEvent('confirm',sendUrl)
     
     handleClose()
 }
-
 
 // 开始录音
 const startRecording = async () => {
@@ -197,12 +205,20 @@ const startRecording = async () => {
     // 创建录音器，使用浏览器支持的格式
     console.log('mimeType', mimeType)
     mediaRecorder.value = new MediaRecorder(stream, { mimeType });
-    const audioChunks = [];
+    // const audioChunks = [];
     
-    mediaRecorder.value.ondataavailable = (e) => audioChunks.push(e.data);
+    mediaRecorder.value.ondataavailable = (e) => {
+      console.log('录音数据:', e.data);  // 打印data
+      audioChunks.value.push(e.data);  // 保存录音数据
+      if (e.data instanceof Blob) {
+        console.log('成功捕获 Blob 数据');
+      } else {
+        console.error('捕获的数据不是 Blob 对象');
+      }
+    };
     
     mediaRecorder.value.onstop = () => {
-      recordedBlob.value = new Blob(audioChunks, { type: mimeType });
+      recordedBlob.value = new Blob(audioChunks.value, { type: mimeType });
       audioUrl.value = URL.createObjectURL(recordedBlob.value);
       sendUrl.value = blobToFormData(audioUrl.value,mimeType.split('/')[1])
       // console.log('audioUrl', audioUrl)
@@ -247,27 +263,21 @@ const getBlobFromUrl = async (url) => {
 };
 // 2. 将 Blob 转换为 FormData
 const blobToFormData = async (audioUrl, fileName) => {
+  const taskId = localStorage.getItem('taskId');
   const blob = await getBlobFromUrl(audioUrl);
   console.log('blob', blob)
   if (!blob) return null;
 
   const formData = new FormData();
-  // 关键：append(键名, Blob 对象, 文件名)
-  // 键名（如 'audioFile'）需与后端接口参数名一致
   console.log('fileName',`file.${fileName}`) 
   formData.append("file", blob, `file.${fileName}`);
   // formData.append('url', props.imgUrl); 
   formData.append('avatarId', props.avatarId); 
   formData.append('musicId', props.musicId);
-  // formData.append('projectId', props.projectId);
   formData.append('token', props.token);
   formData.append('vuid', props.vuid);
-  formData.append('taskId', props.taskId);
-  // formData.append('fileName', 'file.webm');
-  // objectNew.vuid = props.vuid
-  // objectNew.pageSize = 10
-  // objectNew.pageNum = 1
-  // formData.append('Qo', objectNew);
+  formData.append('taskId', taskId);
+  formData.append('projectId', 'AI_YS_WSGW');
 
   return formData;
 };
@@ -394,7 +404,7 @@ onUnmounted(() => {
 
 .record-btn {
   width: 180px;
-  height: 180px;
+  height: 140px;
   /* border-radius: 50%; */
   /* background-color: #ff4d4f; */
   

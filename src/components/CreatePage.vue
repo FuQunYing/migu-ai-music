@@ -19,13 +19,8 @@ let isRequesting = ref(false);
 let progressTimer = null;         // 进度更新计时器
 
 const imgUrl = ref(route.query.url);
-// const file = ref(route.query.audio);
-const avatarId = ref(route.query.avatarId);
-const musicId = ref(route.query.musicId);
-const projectId = ref(route.query.projectId);
 const token = ref(route.query.token);
 const vuid = ref(route.query.vuid);
-const taskId = ref(route.query.taskId);
 onMounted(() => {
   // const data = history.state;
   history.replaceState(null, '', location.pathname);
@@ -65,7 +60,7 @@ const uploadAudio = async (formData, token) => {
 //   });
 //   audioFormData.append('Qo', JSON.stringify(obj));
   try {
-    const response = await fetch('/api/api/userMusic/create', {
+    const response = await fetch('/api/userMusic/create', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}` // 从关联参数获取 token
@@ -75,9 +70,12 @@ const uploadAudio = async (formData, token) => {
 
     if (response.ok) {
       const result = await response.json();
-      // 000000  创建成功  40001, "您已加入队列，请稍后" 50002,"任务在生成中，请稍等" 10002, "生成完成"
-      if(result.code == '000000'|| result.code == '10002'|| result.code == '40001'|| result.code == '50002'){
-        progressTimer = setInterval(fetchResultList, 2000);
+      // 000000  创建成功  40001, "您已加入队列，请稍后" 50002,"任务在生成中，请稍等" 10002, "生成完成" 200 创建成功  
+      if(result.code == '000000'|| result.code == '10002'|| result.code == '40001'|| result.code == '50002'||result.code == '200'){
+        progressTimer = setInterval(fetchResultList, 10000);
+      }else{
+        backVideo.value = false;
+        backVideFalse.value = true;
       }
     } else {
       throw new Error('上传失败');
@@ -97,14 +95,23 @@ const fetchResultList = async (data = {}) => {
       token:token.value,
     });
     console.log('response', response)
-    if(response.data.result.status == '2'){
-      backVideo.value = false;
+    if(response.data.result.status == 2){
       backVideFalse.value = false;
       videoUrl.value = response.data.result.resultUrl;
       backVideo.value = true;
       coverUrl.value = imgUrl.value;
       clearInterval(progressTimer);
+    }else if(response.data.result.status == 3){
+      backVideo.value = false;
+      backVideFalse.value = true;
+      errorMsg = '生成失败，请稍后重试'
+      clearInterval(progressTimer);
+    }else{
+      // 继续轮询 1  40001
+      backVideFalse.value = false;
+      backVideo.value = false;
     }
+     
     return response.data;
   } catch (error) {
     clearTimeout(progressTimer);
@@ -117,7 +124,7 @@ const fetchResultList = async (data = {}) => {
 
 const backCreate = () => {
   // router.back();
-  router.push({ path: '/mainPage' });
+  router.push({ name: 'MainPage' });
 };
 
 function publicVideo() {
@@ -130,7 +137,7 @@ function publicVideo() {
   <div class="index-container">
     <div class="created">
       <div class="loading" v-if="!backVideo&&!backVideFalse">
-        <img src="../assets/loading.png" alt="">
+        <img src="../assets/loading.png" alt="" class="rotating-image">
         <p>正在生成中，请耐心等待</p>
       </div>
       <div class="failPage" v-if="!backVideo&&!!backVideFalse">
@@ -140,7 +147,7 @@ function publicVideo() {
           <p style="font-size: 14px;margin-top:8px;">原因:{{ errorMsg }}</p>
         </div>
         <div class="bottom-btnAgain">
-          <div class="create-btn" @click="backCreate" v-if="!backVideo&&!!backVideFalse">
+          <div class="create-btn" @click="backCreate">
             <div>重新创作</div>
           </div>
         </div>
@@ -157,8 +164,13 @@ function publicVideo() {
           <div class="create-btn" @click="publicVideo">
             <div>发布视频</div>
           </div>
+        </div>
+        <div class="end_ai">
           <div class="ai_msg">
             <img src="../assets/ai_msg.png" alt="">
+          </div>
+          <div class="ai_span">
+            <span>内容由AI生成</span>
           </div>
         </div>
       </div>
@@ -167,13 +179,29 @@ function publicVideo() {
 </template>
 
 <style scoped lang="less">
+.end_ai{
+  display: flex;
+  align-items: center;
+}
 .ai_msg{
-  margin-top: 10px;
+  position: absolute;
+  z-index: 3;
+  bottom: 40px;
+  left: 80px;
+  // margin-top: 10px;
 }
 .ai_msg img{
   width: 70px;
   height: 23px;
   margin-left: -41px;
+}
+.ai_span{
+  position: absolute;
+  z-index: 3;
+  bottom: 45px;
+  right: 80px;
+  font-size: 18px;
+  color: #d1d1d1;
 }
 .play-video-modal{
   width: 100vw;
@@ -494,7 +522,7 @@ function publicVideo() {
     align-items: center;
     >video{
       width: 100%;
-      height: auto;
+      height: 100%;
       position: absolute;
       top: 0;
       left: 0;
@@ -562,7 +590,7 @@ function publicVideo() {
     flex-direction: column;
     position: absolute;
     z-index: 3;
-    bottom: 65px;
+    bottom: 75px;
     left: 50%;
     transform: translateX(-50%);
   }
@@ -592,6 +620,19 @@ function publicVideo() {
       height: 84px;
       margin-bottom: 16px;
     }
+  }
+  @keyframes rotate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* 旋转图片的样式 */
+  .rotating-image {
+    animation: rotate 3s linear infinite; /* 3秒钟转一圈，线性动画，永远循环 */
   }
   .failPage{
     display: flex;
