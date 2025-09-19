@@ -198,8 +198,12 @@ const handleScroll = () => {
         <div @click="closeLog">
           <img src="../assets/btn_back.png" alt=""></div>
           <div>创作记录</div>
+          
         </div>
         <div class="log-list">
+          <div class="log_msg">
+            <p>预览内容保留6个月，请及时发布保存</p>
+          </div>
           <div class="list-con">
             <div  ref="videoItems" class="p-item" v-for="item in videoList" :key="item.id">
               <div class="cover">
@@ -406,6 +410,15 @@ const handleScroll = () => {
   margin-top: 16px;
   position: relative;
   z-index: 1;
+  .log_msg{
+    color: #f1bb55;
+    font-size: 16px;
+    text-align: center;
+    background: #fef6f1;
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+  }
   .list-con{
     width: 100%;
     display: flex;

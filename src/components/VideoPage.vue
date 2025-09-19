@@ -17,6 +17,12 @@ const closeVideo = () => {
       <div class="play-video-modal">
         <div class="close" @click="closeVideo"><img src="../assets/close.png" alt=""></div>
         <video :src="videoUrl" controls autoplay></video>
+        <div class="ai_msg">
+            <img src="../assets/ai_msg.png" alt="">
+          </div>
+          <div class="ai_span">
+            <span>内容由AI生成</span>
+          </div>
       </div>
     </div>
 </template>
@@ -56,5 +62,30 @@ const closeVideo = () => {
 video {
   max-width: 90%;
   max-height: 90%;
+}
+
+.ai_msg {
+  position: absolute;
+  bottom: 20px;
+  left: 40px;
+  z-index: 1001;
+}
+
+.ai_msg img {
+  width: 70px;
+  height: 23px;
+}
+
+.ai_span {
+  position: absolute;
+  bottom: 20px;
+  right: 40px;
+  z-index: 1001;
+}
+
+.ai_span span {
+  color: #d1d1d1;
+  font-size: 12px;
+  opacity: 0.9;
 }
 </style>

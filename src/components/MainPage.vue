@@ -234,7 +234,8 @@ const handleConfirm = () => {
       <div class="choose">
         <div class="tit-img"><img src="../assets/tit-1.png" alt=""></div>
         <div class="current-img">
-          <img :src="currentPreviewImg" alt="">
+          <img class="preview-img" :src="currentPreviewImg" alt="">
+          <img class="ai-msg" src="../assets/ai_msg.png" alt="">
         </div>
         <div class="m-list">
           <div class="m-item" v-for="item in musicList" :key="item.id" :class="currentSel.musicId === item.id ? 'current' : ''" @click="clickM(item.id)">
@@ -397,7 +398,7 @@ const handleConfirm = () => {
     overflow: hidden;
     margin-bottom: 16px;
     position: relative;
-    img{
+    .preview-img{
       width: 100%;
       height: auto;
       border-radius: 8px;
@@ -406,6 +407,13 @@ const handleConfirm = () => {
       top: 50%;
       left: 0;
       transform: translateY(-50%);
+    }
+    .ai-msg{
+      position: absolute;
+      bottom: 8px;  
+      left: 8px;
+      width: 70px;
+      height: 23px;
     }
   }
   .choose{

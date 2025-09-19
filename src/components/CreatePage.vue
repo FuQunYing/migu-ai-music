@@ -186,8 +186,8 @@ function publicVideo() {
 .ai_msg{
   position: absolute;
   z-index: 3;
-  bottom: 40px;
-  left: 80px;
+  bottom: 20px;
+  left: 40px;
   // margin-top: 10px;
 }
 .ai_msg img{
@@ -198,8 +198,8 @@ function publicVideo() {
 .ai_span{
   position: absolute;
   z-index: 3;
-  bottom: 45px;
-  right: 80px;
+  bottom: 25px;
+  right: 40px;
   font-size: 18px;
   color: #d1d1d1;
 }
